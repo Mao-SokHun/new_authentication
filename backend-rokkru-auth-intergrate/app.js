@@ -9,9 +9,7 @@ import { sequelize } from './models/index.js';
 import setupSwagger from './config/swagger.js';
 import authRoutes from './routes/v1/auth/auth.js';
 import userTypesRouter from './routes/v1/userTypes.js';
-// import mentorRoutes from './routes/v1/mentors.js';
-// import mentorController from './controllers/mentorController.js';
-// import { notFoundHandler, errorHandler } from './middlewares/errorHandlers.js';
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -60,18 +58,6 @@ app.use('/api/v1/user-types', userTypesRouter);
 
 // Auth
 app.use('/api/auth', authRoutes);
-
-// Mentor system — router paths are /mentors, /mentors/:userId, ...
-// app.use('/api/v1', mentorRoutes);
-// app.use('/api', mentorRoutes);
-
-// Frontend contract: GET /api/teachers (maps to mentor list/detail)
-// app.get('/api/teachers', mentorController.listMentors);
-// app.get('/api/teachers/:userId', mentorController.getMentorById);
-
-// 404 + centralized errors for mentor API handlers
-// app.use(notFoundHandler);
-// app.use(errorHandler);
 
 // Connect to Database and start server
 async function startServer() {

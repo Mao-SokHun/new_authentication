@@ -2,7 +2,6 @@ import User from "../../../models/userModel.js";
 import OTP from "../../../models/otpModel.js";
 import { sendEmail } from "../../../utils/auth/sendEmail.js";
 import { generateOTP } from "../../../utils/auth/auth.js";
-import { validateEmail } from "../validators/authValidation.js";
 
 export const forgotPassword = async (req, res) => {
   try {
