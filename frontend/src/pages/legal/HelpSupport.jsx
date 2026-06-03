@@ -4,72 +4,78 @@ import clsx from 'clsx'
 import { Link } from 'react-router-dom'
 import { PageScaffold, PageCard, PageAmbient } from '@/components'
 import { useAuth } from '@/hooks'
-import { helpCategories, helpFaqs } from '@/constants'
+import { useTranslation } from '@/i18n'
+import { helpCategories, helpFaqs, localizeHelpCategory, localizeHelpFaq } from '@/constants'
 
 const HelpSupport = () => {
   const { user } = useAuth()
+  const { t, isKhmer } = useTranslation()
   const ambientVariant = user?.role === 'teacher' ? 'teacher' : 'ambient'
   const [openFaq, setOpenFaq] = useState(0)
 
   return (
-    <PageAmbient variant={ambientVariant} className="space-y-6">
+    <PageAmbient variant={ambientVariant} className={clsx('space-y-6', isKhmer && 'font-khmer')}>
       <div className="max-w-3xl mx-auto w-full space-y-5">
-        <PageScaffold title="Help & Support" subtitle="Answers, guides, and ways to reach our team">
+        <PageScaffold title={t('helpPage.title')} subtitle={t('helpPage.subtitle')}>
           <PageCard className="bg-gradient-to-br from-primary-400/90 to-primary-500 text-white border-0">
             <HelpCircle className="w-10 h-10 mb-3 text-primary-100" />
-            <h2 className="text-lg font-bold mb-1">How can we help you?</h2>
-            <p className="text-sm text-primary-50/95 leading-relaxed">
-              Browse common questions below or contact support for account, billing, and session issues.
-            </p>
+            <h2 className="text-lg font-bold mb-1">{t('helpPage.howCanWeHelp')}</h2>
+            <p className="text-sm text-primary-50/95 leading-relaxed">{t('helpPage.heroLead')}</p>
           </PageCard>
 
           <div>
-            <h3 className="text-sm font-bold text-slate-700 mb-3">Browse topics</h3>
+            <h3 className="text-sm font-bold text-slate-700 mb-3">{t('helpPage.browseTopics')}</h3>
             <div className="grid sm:grid-cols-2 gap-3">
-              {helpCategories.map((c) => (
-                <PageCard key={c.label} className="p-4">
-                  <p className="text-sm font-semibold text-slate-800">{c.label}</p>
-                  <p className="text-xs text-slate-600 mt-1 leading-relaxed">{c.description}</p>
-                </PageCard>
-              ))}
+              {helpCategories.map((c) => {
+                const cat = localizeHelpCategory(c, isKhmer)
+                return (
+                  <PageCard key={c.label} className="p-4">
+                    <p className="text-sm font-semibold text-slate-800">{cat.label}</p>
+                    <p className="text-xs text-slate-600 mt-1 leading-relaxed">{cat.description}</p>
+                  </PageCard>
+                )
+              })}
             </div>
           </div>
 
           <PageCard padding={false} className="overflow-hidden">
             <div className="px-5 py-4 border-b border-slate-200/80">
-              <h3 className="font-bold text-slate-800">Frequently asked questions</h3>
+              <h3 className="font-bold text-slate-800">{t('helpPage.faqTitle')}</h3>
             </div>
             <div className="divide-y divide-slate-100">
-              {helpFaqs.map((faq, i) => (
-                <div key={faq.q}>
-                  <button
-                    type="button"
-                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                    className="w-full flex items-start justify-between gap-3 px-5 py-4 text-left hover:bg-slate-50/80 transition-colors"
-                  >
-                    <div className="min-w-0">
-                      <p className="text-[11px] font-bold text-primary-600 uppercase tracking-wide mb-0.5">
-                        {faq.section}
-                      </p>
-                      <p className="text-sm font-semibold text-slate-800">{faq.q}</p>
-                    </div>
-                    <ChevronDown
-                      className={clsx(
-                        'w-4 h-4 text-slate-400 flex-shrink-0 mt-1 transition-transform',
-                        openFaq === i && 'rotate-180'
-                      )}
-                    />
-                  </button>
-                  {openFaq === i && (
-                    <p className="px-5 pb-4 text-sm text-slate-600 leading-relaxed -mt-1">{faq.a}</p>
-                  )}
-                </div>
-              ))}
+              {helpFaqs.map((faq, i) => {
+                const item = localizeHelpFaq(faq, isKhmer)
+                return (
+                  <div key={faq.q}>
+                    <button
+                      type="button"
+                      onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                      className="w-full flex items-start justify-between gap-3 px-5 py-4 text-left hover:bg-slate-50/80 transition-colors"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-[11px] font-bold text-primary-600 uppercase tracking-wide mb-0.5">
+                          {item.section}
+                        </p>
+                        <p className="text-sm font-semibold text-slate-800">{item.q}</p>
+                      </div>
+                      <ChevronDown
+                        className={clsx(
+                          'w-4 h-4 text-slate-400 flex-shrink-0 mt-1 transition-transform',
+                          openFaq === i && 'rotate-180'
+                        )}
+                      />
+                    </button>
+                    {openFaq === i && (
+                      <p className="px-5 pb-4 text-sm text-slate-600 leading-relaxed -mt-1">{item.a}</p>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </PageCard>
 
           <PageCard>
-            <h3 className="font-bold text-slate-800 mb-3">Still need help?</h3>
+            <h3 className="font-bold text-slate-800 mb-3">{t('helpPage.stillNeedHelp')}</h3>
             <div className="space-y-3">
               <a
                 href="mailto:support@rokkru.com"
@@ -77,7 +83,7 @@ const HelpSupport = () => {
               >
                 <Mail className="w-5 h-5 text-primary-500" />
                 <div>
-                  <p className="text-sm font-semibold text-slate-800">Email support</p>
+                  <p className="text-sm font-semibold text-slate-800">{t('helpPage.emailSupport')}</p>
                   <p className="text-xs text-slate-500">support@rokkru.com</p>
                 </div>
               </a>
@@ -87,8 +93,8 @@ const HelpSupport = () => {
               >
                 <MessageSquare className="w-5 h-5 text-primary-500" />
                 <div>
-                  <p className="text-sm font-semibold text-slate-800">Message center</p>
-                  <p className="text-xs text-slate-500">Chat with support from your inbox</p>
+                  <p className="text-sm font-semibold text-slate-800">{t('helpPage.messageCenter')}</p>
+                  <p className="text-xs text-slate-500">{t('helpPage.messageCenterSub')}</p>
                 </div>
               </Link>
             </div>

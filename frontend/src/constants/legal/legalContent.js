@@ -119,6 +119,7 @@ export const helpFaqs = [
     a: "Search for a teacher on Home, open their profile, and choose an available time slot to book.",
     aKm: "ស្វែងរកគ្រូបង្រៀននៅលើទំព័រដើម បើកមើលព័ត៌មានផ្ទាល់ខ្លួនរបស់ពួកគេ រួចជ្រើសរើសចន្លោះពេលដែលទំនេរដើម្បីកក់។",
     section: "Students",
+    sectionKm: "សិស្ស",
   },
   {
     q: "How do I upgrade to Premium as a teacher?",
@@ -126,6 +127,7 @@ export const helpFaqs = [
     a: "Open Subscription in the sidebar, compare plans, and follow the upgrade steps to unlock Premium visibility.",
     aKm: "បើកមើលផ្នែក «ការជាវ» នៅរបារចំហៀង ប្រៀបធៀបគម្រោង រួចធ្វើតាមជំហានដំឡើង ដើម្បីទទួលបានមុខងារបង្ហាញខ្លួនកម្រិត Premium។",
     section: "Teachers",
+    sectionKm: "គ្រូ",
   },
   {
     q: "How do I edit my public profile?",
@@ -133,6 +135,7 @@ export const helpFaqs = [
     a: "Click your avatar → Edit Profile, or use Edit Profile from the profile menu to update your photo, bio, and experience.",
     aKm: "ចុចលើរូបតំណាងរបស់អ្នក (Avatar) → កែប្រែព័ត៌មានផ្ទាល់ខ្លួន ឬប្រើមុខងារ «កែប្រែព័ត៌មានផ្ទាល់ខ្លួន» ពីបញ្ជីជម្រើសដើម្បីធ្វើបច្ចុប្បន្នភាពរូបថត ប្រវត្តិសង្ខេប និងបទពិសោធន៍របស់អ្នក។",
     section: "Teachers",
+    sectionKm: "គ្រូ",
   },
   {
     q: "Where can I manage notifications?",
@@ -140,6 +143,7 @@ export const helpFaqs = [
     a: "Use the bell icon in the top navigation to view alerts. Email preferences can be updated from your profile settings.",
     aKm: "ប្រើប្រាស់រូបតំណាងកណ្តឹងនៅផ្នែកខាងលើដើម្បីមើលការជូនដំណឹង។ ចំពោះជម្រើសអ៊ីមែល អាចធ្វើបច្ចុប្បន្នភាពបាននៅក្នុងការកំណត់ព័ត៌មានផ្ទាល់ខ្លួនរបស់អ្នក។",
     section: "Account",
+    sectionKm: "គណនី",
   },
   {
     q: "How do I post in a community?",
@@ -147,6 +151,7 @@ export const helpFaqs = [
     a: "Go to Community, tap the compose prompt, choose a major or subject community, then write and share your post.",
     aKm: "ចូលទៅកាន់ផ្នែកសហគមន៍ ចុចលើកន្លែងសរសេរអត្ថបទ ជ្រើសរើសក្រុមជំនាញ ឬមុខវិជ្ជាណាមួយ រួចសរសេរ និងចែករំលែកការបង្ហោះរបស់អ្នក។",
     section: "Community",
+    sectionKm: "សហគមន៍",
   },
   {
     q: "Who do I contact for billing issues?",
@@ -154,8 +159,24 @@ export const helpFaqs = [
     a: "Teachers can open Billing & Payments from Settings. For other payment questions, email support@rokkru.com.",
     aKm: "គ្រូបង្រៀនអាចបើកមើលផ្នែក «វិក្កយបត្រ និងការទូទាត់» នៅក្នុងការកំណត់។ សម្រាប់សំណួរផ្សេងទៀតអំពីការទូទាត់ប្រាក់ សូមផ្ញើអ៊ីមែលទៅ support@rokkru.com។",
     section: "Billing",
+    sectionKm: "វិក្កយបត្រ",
   },
 ]
+
+export function localizeHelpCategory(category, isKhmer) {
+  return {
+    label: isKhmer ? category.labelKm : category.label,
+    description: isKhmer ? category.descriptionKm : category.description,
+  }
+}
+
+export function localizeHelpFaq(faq, isKhmer) {
+  return {
+    section: isKhmer ? faq.sectionKm : faq.section,
+    q: isKhmer ? faq.qKm : faq.q,
+    a: isKhmer ? faq.aKm : faq.a,
+  }
+}
 
 export const helpCategories = [
   {
