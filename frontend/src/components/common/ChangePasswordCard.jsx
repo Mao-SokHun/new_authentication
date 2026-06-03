@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
+import clsx from 'clsx'
 import PageCard from './PageCard'
 import { useTranslation } from '@/i18n'
 import { isApiEnabled } from '@/constants'
@@ -52,7 +53,7 @@ const PasswordField = ({
 )
 
 const ChangePasswordCard = () => {
-  const { t } = useTranslation()
+  const { t, isKhmer } = useTranslation()
   const apiOn = isApiEnabled()
   const [formOpen, setFormOpen] = useState(false)
   const [oldPassword, setOldPassword] = useState('')
@@ -61,8 +62,9 @@ const ChangePasswordCard = () => {
   const [showOld, setShowOld] = useState(false)
   const [showNew, setShowNew] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
+  /** i18n key — rendered with t() so language switch updates the message */
+  const [errorKey, setErrorKey] = useState('')
+  const [showSuccess, setShowSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const showLabel = t('teacherProfile.showPassword')
@@ -75,12 +77,12 @@ const ChangePasswordCard = () => {
     setShowOld(false)
     setShowNew(false)
     setShowConfirm(false)
-    setError('')
+    setErrorKey('')
   }
 
   const handleOpen = () => {
-    setSuccess('')
-    setError('')
+    setShowSuccess(false)
+    setErrorKey('')
     setFormOpen(true)
   }
 
@@ -98,38 +100,38 @@ const ChangePasswordCard = () => {
     setLoading(false)
   }
 
-  const mapError = (err) => {
+  const mapErrorKey = (err) => {
     switch (err?.message) {
       case 'CHANGE_PASSWORD_OLD_INCORRECT':
-        return t('teacherProfile.oldPasswordIncorrect')
+        return 'teacherProfile.oldPasswordIncorrect'
       case 'CHANGE_PASSWORD_UNAUTHORIZED':
-        return t('teacherProfile.changePasswordUnauthorized')
+        return 'teacherProfile.changePasswordUnauthorized'
       case 'CHANGE_PASSWORD_API_DISABLED':
-        return t('teacherProfile.changePasswordApiDisabled')
+        return 'teacherProfile.changePasswordApiDisabled'
       default:
-        return t('teacherProfile.changePasswordFailed')
+        return 'teacherProfile.changePasswordFailed'
     }
   }
 
   const runPasswordUpdate = async () => {
-    setError('')
-    setSuccess('')
+    setErrorKey('')
+    setShowSuccess(false)
 
     if (!apiOn) {
-      setError(t('teacherProfile.changePasswordApiDisabled'))
+      setErrorKey('teacherProfile.changePasswordApiDisabled')
       return
     }
 
     if (!oldPassword.trim()) {
-      setError(t('teacherProfile.currentPasswordRequired'))
+      setErrorKey('teacherProfile.currentPasswordRequired')
       return
     }
     if (!isValidPassword(newPassword)) {
-      setError(t('auth.passwordRequirements'))
+      setErrorKey('auth.passwordRequirements')
       return
     }
     if (newPassword !== confirmPassword) {
-      setError(t('auth.passwordMismatch'))
+      setErrorKey('auth.passwordMismatch')
       return
     }
 
@@ -141,10 +143,10 @@ const ChangePasswordCard = () => {
         newPassword,
       })
       resetFields()
-      setSuccess(t('teacherProfile.changePasswordSuccess'))
+      setShowSuccess(true)
       setFormOpen(false)
     } catch (err) {
-      setError(mapError(err))
+      setErrorKey(mapErrorKey(err))
     } finally {
       await finishLoading(startedAt)
     }
@@ -156,7 +158,7 @@ const ChangePasswordCard = () => {
   }
 
   return (
-    <PageCard className="relative">
+    <PageCard className={clsx('relative', isKhmer && 'font-khmer')}>
       {loading && (
         <div
           className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-white/75 backdrop-blur-[2px]"
@@ -181,9 +183,9 @@ const ChangePasswordCard = () => {
         </p>
       )}
 
-      {success && !formOpen && (
+      {showSuccess && !formOpen && (
         <p className="text-xs text-emerald-600 mb-3" role="status">
-          {success}
+          {t('teacherProfile.changePasswordSuccess')}
         </p>
       )}
 
@@ -243,9 +245,9 @@ const ChangePasswordCard = () => {
             </p>
           )}
 
-          {error && (
+          {errorKey && (
             <p className="text-xs text-red-600" role="alert">
-              {error}
+              {t(errorKey)}
             </p>
           )}
 
