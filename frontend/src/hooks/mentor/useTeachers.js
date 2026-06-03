@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { fetchTeachers } from '@/services/mentors/teacherService'
 
 /**
- * Fetches teacher list from API (or mock fallback).
+ * Fetches teacher list from GET /api/v1/mentors (empty when API is off).
  * Calls GET /api/v1/mentors with page, limit, q, skillId, subSkillId, minExperience.
  * Response: { success, data: { item, total, page, limit } }
  */

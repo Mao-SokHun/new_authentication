@@ -1,16 +1,16 @@
-# constants/
+# Constants (`@/constants`)
+
+Domain-organized app constants (no mock data folder).
 
 ```
 constants/
-  index.js
-  config/       env (VITE_USE_MOCK, API URL)
+  config/       env (API URL)
   ui/           tokens, typography
-  filters/      teacherFilters, majorSubjects, languages…
-  mock/         mockData, communities, communityFeed…
-  legal/        terms, privacy, help content
-  backgrounds/  mesh & polygon presets
+  filters/      teacher filters, subjects
+  teacher/      empty profile defaults, gender options
+  communities/  UI tabs/categories; lists filled via API
+  legal/        privacy/terms/help copy
+  backgrounds/  mesh/polygon presets
 ```
 
-Import from barrel: `import { FILTER_ALL, teachers, isApiEnabled } from '@/constants'`
-
-Or direct: `import { isApiEnabled } from '@/constants/config/env'`
+Import from barrel: `import { FILTER_ALL, isApiEnabled } from '@/constants'`

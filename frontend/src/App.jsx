@@ -29,6 +29,7 @@ import TeacherPublicProfile from './pages/teacher/TeacherPublicProfile'
 import TeacherMyProfile from './pages/teacher/TeacherMyProfile'
 import TeacherBilling from './pages/teacher/TeacherBilling'
 import TeacherCreatePost from './pages/teacher/TeacherCreatePost'
+import TeacherSchedule from './pages/teacher/TeacherSchedule'
 import CreateCommunity from './pages/community/CreateCommunity'
 import CommunityCreatePost from './pages/community/CommunityCreatePost'
 import CommunityDetail from './pages/community/CommunityDetail'
@@ -180,6 +181,11 @@ const AppRoutes = () => (
     <Route path="/teacher/create-post" element={
       <ProtectedRoute role="teacher">
         <MainLayout><TeacherCreatePost /></MainLayout>
+      </ProtectedRoute>
+    } />
+    <Route path="/teacher/schedule" element={
+      <ProtectedRoute role="teacher">
+        <MainLayout><TeacherSchedule /></MainLayout>
       </ProtectedRoute>
     } />
     <Route path="/teacher/profile/:id" element={

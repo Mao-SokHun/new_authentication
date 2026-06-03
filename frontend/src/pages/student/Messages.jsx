@@ -9,52 +9,14 @@ import Badge from '../../components/ui/Badge'
 import { PageCard, PageAmbient } from '@/components'
 import clsx from 'clsx'
 
-const conversations = [
-  {
-    id: 1, name: 'Dr. Sarah Jenkins', role: 'teacher', online: true, unread: 2,
-    lastMsg: "Sure! I can help you with that integral. Let's look at it together.", time: '2 min ago',
-    messages: [
-      { id: 1, from: 'them', text: 'Hi! I saw you booked a session for next Monday.', time: '10:00 AM' },
-      { id: 2, from: 'me', text: "Yes! I'm really looking forward to it. I'm struggling with integration by parts.", time: '10:02 AM' },
-      { id: 3, from: 'them', text: "Great topic! It's one of the most useful techniques in calculus.", time: '10:05 AM' },
-      { id: 4, from: 'me', text: 'Could we also look at the integral of x²·sin(x) as an example?', time: '10:06 AM' },
-      { id: 5, from: 'them', text: "Sure! I can help you with that integral. Let's look at it together.", time: '10:08 AM' },
-    ],
-  },
-  {
-    id: 2, name: 'Dr. James Wilson', role: 'teacher', online: false, unread: 0,
-    lastMsg: 'Your session recording has been uploaded to your dashboard.', time: '1 hr ago',
-    messages: [
-      { id: 1, from: 'them', text: "Great session today! You're improving really fast.", time: '9:00 AM' },
-      { id: 2, from: 'me', text: "Thank you so much! Your explanation of Schrödinger's equation finally clicked.", time: '9:05 AM' },
-      { id: 3, from: 'them', text: 'Your session recording has been uploaded to your dashboard.', time: '9:10 AM' },
-    ],
-  },
-  {
-    id: 3, name: 'Ms. Linda Chea', role: 'teacher', online: true, unread: 1,
-    lastMsg: "Don't forget to practice the Reading section before our next session!", time: '3 hrs ago',
-    messages: [
-      { id: 1, from: 'them', text: 'Hello! Ready for our IELTS prep?', time: '2:00 PM' },
-      { id: 2, from: 'me', text: "Yes, I've been practicing the writing tasks.", time: '2:05 PM' },
-      { id: 3, from: 'them', text: "Don't forget to practice the Reading section before our next session!", time: '2:30 PM' },
-    ],
-  },
-  {
-    id: 4, name: 'Bopha Keo', role: 'student', online: false, unread: 0,
-    lastMsg: 'Thanks for sharing those calc notes!', time: 'Yesterday',
-    messages: [
-      { id: 1, from: 'me', text: "Hey! Did you get the notes from yesterday's study group?", time: 'Yesterday' },
-      { id: 2, from: 'them', text: 'Thanks for sharing those calc notes!', time: 'Yesterday' },
-    ],
-  },
-]
+const conversations = []
 
 const quickReplies = ['Sounds good! 👍', 'Thanks!', 'Can we reschedule?', 'See you then!']
 
 const Messages = () => {
-  const [selected, setSelected] = useState(conversations[0])
+  const [selected, setSelected] = useState(null)
   const [newMsg, setNewMsg] = useState('')
-  const [msgs, setMsgs] = useState(conversations[0].messages)
+  const [msgs, setMsgs] = useState([])
   const [search, setSearch] = useState('')
   const [showSidebar, setShowSidebar] = useState(true)
   const bottomRef = useRef(null)
@@ -121,6 +83,9 @@ const Messages = () => {
         </div>
 
         <div className="flex-1 overflow-y-auto divide-y divide-slate-50">
+          {filtered.length === 0 && (
+            <p className="text-sm text-slate-500 text-center py-8 px-4">No conversations yet.</p>
+          )}
           {filtered.map((conv) => (
             <button
               key={conv.id}

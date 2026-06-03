@@ -8,7 +8,7 @@ import {
 
   BarChart2, CreditCard, PenSquare, LogOut, Search,
 
-  Menu, X, Grid3x3, User,
+  Menu, X, Grid3x3, User, PanelLeftClose, PanelLeftOpen,
 
 } from 'lucide-react'
 
@@ -26,6 +26,7 @@ import { resumeSubscription } from '../../utils/teacherSubscription'
 import SettingsMenu from './SettingsMenu'
 import LanguageSwitcher from '../ui/LanguageSwitcher'
 import { useTranslation } from '@/i18n'
+import ProfileCompletionGate from '../common/ProfileCompletionGate'
 
 
 
@@ -35,26 +36,30 @@ import { useTranslation } from '@/i18n'
 
 ───────────────────────────────────── */
 
-const topNavTabs = [
-
-  { labelKey: 'nav.home', href: '/home' },
-
-  { labelKey: 'nav.schedule', href: '/schedule' },
-
-  { labelKey: 'nav.community', href: '/community' },
-
-]
-
-
-
 const isTabActive = (pathname, href) => {
 
-  if (href === '/home') return pathname === '/home' || pathname === '/'
+  if (href === '/home' || href === '/teacher/home') {
+    return pathname === '/home' || pathname === '/' || pathname === '/teacher/home'
+  }
 
   if (href === '/community') return pathname === '/community' || pathname.startsWith('/community/')
 
+  if (href === '/teacher/schedule') {
+    return pathname === '/teacher/schedule' || pathname.startsWith('/teacher/create-post')
+  }
+
   return pathname === href || pathname.startsWith(`${href}/`)
 
+}
+
+
+
+function buildTopNavTabs(isTeacher) {
+  return [
+    { labelKey: 'nav.home', href: isTeacher ? '/teacher/home' : '/home' },
+    { labelKey: 'nav.schedule', href: isTeacher ? '/teacher/schedule' : '/schedule' },
+    { labelKey: 'nav.community', href: '/community' },
+  ]
 }
 
 
@@ -101,7 +106,17 @@ const studentSideNav = [
 
 ───────────────────────────────────── */
 
-const Sidebar = ({ mobile, onClose, onAction }) => {
+const SIDEBAR_COLLAPSED_KEY = 'rokkru_teacher_sidebar_collapsed'
+
+const readSidebarCollapsed = () => {
+  try {
+    return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+const Sidebar = ({ mobile, onClose, onAction, collapsed = false, onToggleCollapse }) => {
 
   const location = useLocation()
 
@@ -153,17 +168,17 @@ const Sidebar = ({ mobile, onClose, onAction }) => {
 
       {/* Role header */}
 
-      <div className="px-4 py-4 border-b border-white/40 flex-shrink-0">
+      <div className={clsx('px-4 py-4 border-b border-white/40 flex-shrink-0', collapsed && 'px-2 py-3')}>
 
-        <div className="flex items-center gap-2.5 min-w-0">
+        <div className={clsx('flex items-center gap-2.5 min-w-0', collapsed && 'justify-center')}>
 
           <Avatar name={user?.name || 'User'} size="md" className="flex-shrink-0" />
 
-          <p className="text-sm font-semibold text-slate-800 truncate leading-snug">
-
-            {user?.name || 'User'}
-
-          </p>
+          {!collapsed && (
+            <p className="text-sm font-semibold text-slate-800 truncate leading-snug">
+              {user?.name || 'User'}
+            </p>
+          )}
 
         </div>
 
@@ -173,7 +188,7 @@ const Sidebar = ({ mobile, onClose, onAction }) => {
 
       {/* Nav items */}
 
-      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+      <nav className={clsx('flex-1 px-3 py-4 space-y-0.5 overflow-y-auto', collapsed && 'px-2')}>
 
         {navItems.map((item) => {
 
@@ -189,9 +204,13 @@ const Sidebar = ({ mobile, onClose, onAction }) => {
 
               onClick={() => handleClick(item)}
 
+              title={collapsed ? t(item.labelKey) : undefined}
+
               className={clsx(
 
                 'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium group glass-ios-nav-item',
+
+                collapsed && 'justify-center px-2 gap-0',
 
                 active
 
@@ -205,9 +224,12 @@ const Sidebar = ({ mobile, onClose, onAction }) => {
 
               <item.icon className={clsx('w-4 h-4 flex-shrink-0', active ? 'text-primary-500' : 'text-slate-400 group-hover:text-slate-600')} />
 
-              {t(item.labelKey)}
-
-              {active && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-primary-300" />}
+              {!collapsed && (
+                <>
+                  {t(item.labelKey)}
+                  {active && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-primary-300" />}
+                </>
+              )}
 
             </Link>
 
@@ -219,21 +241,59 @@ const Sidebar = ({ mobile, onClose, onAction }) => {
 
 
 
-      {/* Logout */}
+      {/* Collapse + logout */}
 
-      <div className="border-t border-white/40 p-3 flex-shrink-0">
+      <div className={clsx('border-t border-white/40 p-3 flex-shrink-0 space-y-1', collapsed && 'px-2')}>
+
+        {!mobile && onToggleCollapse && (
+
+          <button
+
+            type="button"
+
+            onClick={onToggleCollapse}
+
+            title={collapsed ? t('sidebar.expand') : t('sidebar.collapse')}
+
+            aria-label={collapsed ? t('sidebar.expand') : t('sidebar.collapse')}
+
+            className={clsx(
+
+              'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-500 glass-ios-nav-item hover:text-primary-600',
+
+              collapsed && 'justify-center px-2'
+
+            )}
+
+          >
+
+            {collapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
+
+            {!collapsed && t('sidebar.collapse')}
+
+          </button>
+
+        )}
 
         <button
 
           onClick={handleLogout}
 
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-500 glass-ios-nav-item hover:text-red-500"
+          title={collapsed ? t('auth.logout') : undefined}
+
+          className={clsx(
+
+            'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-500 glass-ios-nav-item hover:text-red-500',
+
+            collapsed && 'justify-center px-2'
+
+          )}
 
         >
 
-          <LogOut className="w-4 h-4" />
+          <LogOut className="w-4 h-4 flex-shrink-0" />
 
-          {t('auth.logout')}
+          {!collapsed && t('auth.logout')}
 
         </button>
 
@@ -265,7 +325,11 @@ const MainLayout = ({ children }) => {
 
   const isTeacher  = user?.role === 'teacher'
 
+  const topNavTabs = buildTopNavTabs(isTeacher)
+
   const [mobileMenuOpen,  setMobileMenuOpen]  = useState(false)
+
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(readSidebarCollapsed)
 
   const [searchQuery,     setSearchQuery]     = useState('')
 
@@ -273,6 +337,18 @@ const MainLayout = ({ children }) => {
 
   const handleResumeSubscription = () => {
     setSubscription(resumeSubscription())
+  }
+
+  const toggleSidebarCollapsed = () => {
+    setSidebarCollapsed((prev) => {
+      const next = !prev
+      try {
+        localStorage.setItem(SIDEBAR_COLLAPSED_KEY, next ? '1' : '0')
+      } catch {
+        /* ignore */
+      }
+      return next
+    })
   }
 
   const handleSearch = (e) => {
@@ -290,6 +366,8 @@ const MainLayout = ({ children }) => {
 
 
   return (
+
+    <ProfileCompletionGate>
 
     <div
       className="h-screen max-h-screen h-dvh max-h-dvh flex flex-col overflow-hidden app-glass-scope glass-ios-26-shell relative bg-slate-50"
@@ -310,7 +388,11 @@ const MainLayout = ({ children }) => {
         <RokkruLogo
           to={user?.role === 'teacher' ? '/teacher/home' : '/home'}
           size="md"
-          className={clsx('px-5 sm:px-6 flex-shrink-0', isTeacher ? 'w-44' : 'w-auto')}
+          showText={!isTeacher || !sidebarCollapsed}
+          className={clsx(
+            'flex-shrink-0 transition-[width,padding] duration-200',
+            isTeacher ? (sidebarCollapsed ? 'w-[4.25rem] justify-center px-2' : 'w-44 px-5 sm:px-6') : 'px-5 sm:px-6'
+          )}
         />
 
 
@@ -361,24 +443,22 @@ const MainLayout = ({ children }) => {
 
         <div className="flex items-center gap-2.5 sm:gap-3 px-4 sm:px-5 ml-auto overflow-visible">
 
-          <div className="hidden sm:flex items-center gap-2.5 rounded-full px-4 py-2.5 min-h-[2.5rem] bg-white border-2 border-slate-300 shadow-sm focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-200/80">
-
+          <div
+            className={clsx(
+              'hidden sm:flex items-center gap-2.5 min-w-0 rounded-full px-4 py-2.5 min-h-[2.5rem] bg-white border-2 border-slate-300 shadow-sm',
+              'focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-200/80',
+              'w-52 sm:w-60 md:w-72 lg:w-80 max-w-[min(100vw-14rem,26rem)]'
+            )}
+          >
             <Search className="w-4 h-4 text-slate-400 flex-shrink-0" />
 
             <input
-
               value={searchQuery}
-
               onChange={(e) => setSearchQuery(e.target.value)}
-
               onKeyDown={handleSearch}
-
               placeholder={t('search.teachers')}
-
-              className="bg-transparent text-base text-slate-700 placeholder-slate-400 outline-none w-40 lg:w-52 focus:w-56 transition-all duration-300"
-
+              className="min-w-0 flex-1 w-full bg-transparent text-sm sm:text-base text-slate-700 placeholder-slate-400 outline-none"
             />
-
           </div>
 
 
@@ -427,13 +507,17 @@ const MainLayout = ({ children }) => {
 
           <aside
             className={clsx(
-              'hidden md:flex flex-col w-44 z-30 glass-ios-sidebar glass-ios-sidebar--teacher flex-shrink-0 min-h-0 overflow-hidden relative',
+              'hidden md:flex flex-col z-30 glass-ios-sidebar glass-ios-sidebar--teacher flex-shrink-0 min-h-0 overflow-hidden relative transition-[width] duration-200 ease-out',
+              sidebarCollapsed ? 'w-[4.25rem]' : 'w-44',
               isKhmer && 'font-khmer'
             )}
           >
 
             <div className="relative z-[2] flex flex-col flex-1 min-h-0 min-w-0">
-              <Sidebar />
+              <Sidebar
+                collapsed={sidebarCollapsed}
+                onToggleCollapse={toggleSidebarCollapsed}
+              />
             </div>
 
           </aside>
@@ -574,10 +658,10 @@ const MainLayout = ({ children }) => {
 
     </div>
 
+    </ProfileCompletionGate>
+
   )
 
 }
-
-
 
 export default MainLayout

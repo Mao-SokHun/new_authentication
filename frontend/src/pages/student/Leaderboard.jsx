@@ -8,18 +8,7 @@ import clsx from 'clsx'
 const periods = ['This Week', 'This Month', 'All Time']
 const categories = ['Top Students', 'Top Teachers', 'Most Active']
 
-const students = [
-  { rank: 1, name: 'Sokha Dara', sessions: 48, hours: 96, streak: 21, points: 4820, badge: 'Diamond', subjects: ['Math', 'Data Science'] },
-  { rank: 2, name: 'Bopha Keo', sessions: 42, hours: 84, streak: 18, points: 4210, badge: 'Diamond', subjects: ['English', 'IELTS'] },
-  { rank: 3, name: 'Dara Chan', sessions: 38, hours: 76, streak: 14, points: 3860, badge: 'Platinum', subjects: ['Programming', 'Web Dev'] },
-  { rank: 4, name: 'Maly Sim', sessions: 35, hours: 70, streak: 12, points: 3540, badge: 'Platinum', subjects: ['Physics', 'Math'] },
-  { rank: 5, name: 'Rathana Ky', sessions: 31, hours: 62, streak: 9, points: 3120, badge: 'Gold', subjects: ['Data Science'] },
-  { rank: 6, name: 'Visal Roth', sessions: 28, hours: 56, streak: 7, points: 2830, badge: 'Gold', subjects: ['Chemistry'] },
-  { rank: 7, name: 'Pisey Khem', sessions: 25, hours: 50, streak: 6, points: 2540, badge: 'Silver', subjects: ['English', 'French'] },
-  { rank: 8, name: 'Chanda Oun', sessions: 22, hours: 44, streak: 5, points: 2230, badge: 'Silver', subjects: ['Biology'] },
-  { rank: 9, name: 'Narith Sen', sessions: 19, hours: 38, streak: 4, points: 1940, badge: 'Bronze', subjects: ['Math'] },
-  { rank: 10, name: 'Alex Johnson', sessions: 17, hours: 34, streak: 7, points: 1740, badge: 'Bronze', subjects: ['Math', 'ML'] },
-]
+const students = []
 
 const badgeConfig = {
   Diamond: { color: 'from-cyan-400 to-blue-500', textColor: 'text-cyan-600', bg: 'bg-cyan-50' },
@@ -41,7 +30,19 @@ const Leaderboard = () => {
 
   const top3 = students.slice(0, 3)
   const rest = students.slice(3)
-  const currentUserRank = students.find((s) => s.name === 'Alex Johnson')
+  const currentUserRank = null
+
+  if (students.length === 0) {
+    return (
+      <PageAmbient variant="leaderboard" className="space-y-8">
+        <div className="text-center py-16">
+          <Trophy className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+          <p className="font-semibold text-slate-600">No leaderboard data yet</p>
+          <p className="text-sm text-slate-400 mt-1">Rankings will appear when sessions are recorded.</p>
+        </div>
+      </PageAmbient>
+    )
+  }
 
   return (
     <PageAmbient variant="leaderboard" className="space-y-8">

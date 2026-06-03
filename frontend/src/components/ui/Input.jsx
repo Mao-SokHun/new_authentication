@@ -1,6 +1,7 @@
 import { forwardRef } from 'react'
 import clsx from 'clsx'
 import FieldLabel from './FieldLabel'
+import { FORM_FINE_PRINT_CLASS } from '../common/RequiredFieldsHint'
 
 const Input = forwardRef(
   (
@@ -71,7 +72,9 @@ const Input = forwardRef(
         )}
       </div>
       {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
-      {hint && !error && <p className="mt-2 text-sm text-slate-500">{hint}</p>}
+      {hint && !error && (
+        <p className={clsx('mt-1', FORM_FINE_PRINT_CLASS)}>{hint}</p>
+      )}
     </div>
   )
 }

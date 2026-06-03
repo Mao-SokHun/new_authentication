@@ -1,28 +1,27 @@
 import { useState, useMemo } from 'react'
+import { Navigate } from 'react-router-dom'
 import { PageAmbient, PageSection, PaginationBar } from '@/components'
 import { SearchFilter, TeacherList } from '@/components'
-import { useTeacherFilters, useTeachers } from '@/hooks'
+import { useAuth, useTeacherFilters, useTeachers } from '@/hooks'
 import { useTranslation } from '@/i18n'
 
 const PAGE_SIZE = 12
 
 const Schedule = () => {
   const { t } = useTranslation()
+  const { user } = useAuth()
   const { filters, setFilter, reset } = useTeacherFilters()
   const [page, setPage] = useState(1)
 
   const listFilters = useMemo(
     () => ({ ...filters, page: 1, pageSize: 9999 }),
-    [
-      filters.major,
-      filters.subject,
-      filters.location,
-      filters.sort,
-      filters.type,
-      filters.time,
-    ]
+    [filters.major, filters.subject, filters.location, filters.sort, filters.type, filters.time]
   )
   const { teachers: allTeachers, total, loading } = useTeachers(listFilters)
+
+  if (user?.role === 'teacher') {
+    return <Navigate to="/teacher/schedule" replace />
+  }
 
   const paged = allTeachers.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 

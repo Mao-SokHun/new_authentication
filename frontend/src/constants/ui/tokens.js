@@ -42,7 +42,7 @@ export const topNavTabs = [
   { label: 'COMMUNITY', href: '/community' },
 ]
 
-export { COMMUNITY_FEED_TABS as communitySubjectTabs } from '../mock/communities'
+export { COMMUNITY_FEED_TABS as communitySubjectTabs } from '../communities/communityUi'
 
 export const teacherSidebarNav = [
   { label: 'Dashboard', href: '/teacher/home', key: 'dashboard' },

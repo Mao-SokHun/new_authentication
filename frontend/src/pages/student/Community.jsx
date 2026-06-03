@@ -55,15 +55,19 @@ const Community = () => {
       </section>
 
       <div className="flex flex-col gap-4 sm:gap-5 w-full">
-        {displayed.map((post) => (
-          <CommunityPostCard
-            key={post.id}
-            post={post}
-            comments={commentsByPost[post.id] || []}
-            liked={likedIds.includes(post.id)}
-            onLike={() => toggleLike(post.id)}
-          />
-        ))}
+        {displayed.length === 0 ? (
+          <p className="text-sm text-slate-500 text-center py-12">{t('communityPost.emptyFeed')}</p>
+        ) : (
+          displayed.map((post) => (
+            <CommunityPostCard
+              key={post.id}
+              post={post}
+              comments={commentsByPost[post.id] || []}
+              liked={likedIds.includes(post.id)}
+              onLike={() => toggleLike(post.id)}
+            />
+          ))
+        )}
       </div>
 
       <CreatePostModal open={createOpen} onClose={handleCloseCreate} />

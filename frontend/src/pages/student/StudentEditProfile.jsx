@@ -9,8 +9,14 @@ import Select from '../../components/ui/Select'
 import SearchableSelect from '../../components/ui/SearchableSelect'
 import clsx from 'clsx'
 import { useTranslation, localizeOptionList } from '@/i18n'
-import { FILTER_ALL, locationOptions } from '@/constants'
+import { FILTER_ALL, locationOptions, isApiEnabled } from '@/constants'
 import { deleteAccountWithPassword } from '@/services/auth/authService'
+import { resolveStudentProfile } from '@/lib/studentProfile'
+import {
+  saveStudentProfile,
+  fetchMyStudentProfile,
+} from '@/services/students/studentProfileService'
+import { getPhoneDigits, sanitizePhoneInput } from '@/utils/phoneInput'
 
 const subjectOptions = [
   'Mathematics',
@@ -28,17 +34,21 @@ const provinces = locationOptions.filter((p) => p !== FILTER_ALL.location)
 
 const StudentEditProfile = () => {
   const navigate = useNavigate()
-  const { user, logout } = useAuth()
+  const { user, logout, updateUser } = useAuth()
   const { t, labelFor } = useTranslation()
-  const displayName = user?.name || t('auth.student')
-  const studentId = user?.id?.toString().padStart(5, '0') || '10001'
+  const defaults = resolveStudentProfile(user)
+  const displayName = defaults.displayName || t('auth.student')
+  const studentId = user?.id ? String(user.id).padStart(5, '0') : '—'
 
-  const [bio, setBio] = useState(t('profile.defaultEditBio'))
-  const [email, setEmail] = useState(user?.email || 'student@rokkru.com')
-  const [phone, setPhone] = useState('+855 12 345 678')
-  const [learningFocus, setLearningFocus] = useState('IT')
-  const [province, setProvince] = useState('Phnom Penh')
-  const [selectedSubjects, setSelectedSubjects] = useState(['Mathematics', 'Physics', 'Data Science'])
+  const [profileLoading, setProfileLoading] = useState(isApiEnabled())
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState('')
+  const [bio, setBio] = useState(defaults.bio)
+  const [email, setEmail] = useState(defaults.email)
+  const [phone, setPhone] = useState(defaults.phone)
+  const [learningFocus, setLearningFocus] = useState(defaults.learningFocus)
+  const [province, setProvince] = useState(defaults.province || defaults.location)
+  const [selectedSubjects, setSelectedSubjects] = useState(defaults.interests)
   const [avatarPreview, setAvatarPreview] = useState(null)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [deletePassword, setDeletePassword] = useState('')
@@ -49,6 +59,35 @@ const StudentEditProfile = () => {
 
   const learningFocusOptions = localizeOptionList(learningFocusAreas, labelFor)
   const provinceOptions = localizeOptionList(provinces, labelFor)
+
+  useEffect(() => {
+    if (!isApiEnabled() || !user?.id) {
+      setProfileLoading(false)
+      return
+    }
+
+    let cancelled = false
+    setProfileLoading(true)
+
+    fetchMyStudentProfile()
+      .then((row) => {
+        if (cancelled || !row) return
+        const merged = resolveStudentProfile({ ...user, ...row })
+        setBio(merged.bio)
+        setPhone(merged.phone)
+        setLearningFocus(merged.learningFocus)
+        setProvince(merged.province || merged.location)
+        setSelectedSubjects(merged.interests)
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setProfileLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [user?.id])
 
   const openPhotoPicker = () => photoInputRef.current?.click()
 
@@ -70,6 +109,33 @@ const StudentEditProfile = () => {
 
   const toggleSubject = (s) =>
     setSelectedSubjects((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]))
+
+  const handleSave = async () => {
+    setSaveError('')
+    setSaving(true)
+    try {
+      const patch = {
+        firstName: defaults.firstName,
+        lastName: defaults.lastName,
+        name: displayName,
+        email,
+        phone: getPhoneDigits(phone),
+        bio: bio.trim(),
+        location: province,
+        province,
+        learningFocus,
+        interests: selectedSubjects,
+        goals: user?.goals ?? [],
+      }
+      const saved = await saveStudentProfile(patch)
+      updateUser(saved)
+      navigate('/profile')
+    } catch (err) {
+      setSaveError(err?.message || t('profile.saveFailed'))
+    } finally {
+      setSaving(false)
+    }
+  }
 
   const openDeleteModal = () => {
     setDeleteModalOpen(true)
@@ -118,6 +184,14 @@ const StudentEditProfile = () => {
     }
   }
 
+  if (profileLoading) {
+    return (
+      <PageAmbient variant="ambient">
+        <div className="py-16 text-center text-slate-500">{t('student.loadingTeachers')}</div>
+      </PageAmbient>
+    )
+  }
+
   return (
     <PageAmbient variant="ambient" className="space-y-6">
       <PageScaffold
@@ -128,21 +202,28 @@ const StudentEditProfile = () => {
             <button
               type="button"
               onClick={() => navigate('/profile')}
-              className="px-4 py-2 text-sm font-medium text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors"
+              disabled={saving}
+              className="px-4 py-2 text-sm font-medium text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors disabled:opacity-60"
             >
               {t('profile.cancel')}
             </button>
             <button
               type="button"
-              onClick={() => navigate('/profile')}
-              className="px-5 py-2 text-sm font-semibold bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition-colors shadow-sm"
+              onClick={handleSave}
+              disabled={saving}
+              className="px-5 py-2 text-sm font-semibold bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition-colors shadow-sm disabled:opacity-60"
             >
-              {t('profile.saveChanges')}
+              {saving ? t('profile.saving') : t('profile.saveChanges')}
             </button>
           </div>
         }
         className="mb-2"
       >
+        {saveError && (
+          <p className="text-sm text-red-600 mb-4" role="alert">
+            {saveError}
+          </p>
+        )}
         <div className="grid lg:grid-cols-3 gap-5">
           <div className="space-y-4">
             <PageCard className="text-center">
@@ -233,7 +314,7 @@ const StudentEditProfile = () => {
                       id="email"
                       type="email"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      readOnly
                       className="flex-1 text-sm text-slate-700 bg-transparent outline-none"
                     />
                   </div>
@@ -247,8 +328,9 @@ const StudentEditProfile = () => {
                     <input
                       id="phone"
                       type="tel"
+                      inputMode="numeric"
                       value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
+                      onChange={(e) => setPhone(sanitizePhoneInput(e.target.value))}
                       className="flex-1 text-sm text-slate-700 bg-transparent outline-none"
                     />
                   </div>

@@ -1,6 +1,7 @@
 export { default as AuthRoleTabs } from './AuthRoleTabs'
 export { default as PublicNavbar } from './PublicNavbar'
 export { default as CompleteProfileModal } from './CompleteProfileModal'
+export { default as ProfileCompletionGate } from './ProfileCompletionGate'
 export { default as CompleteTeacherProfileModal } from './CompleteTeacherProfileModal'
 
 export { default as TeacherCard } from './TeacherCard'

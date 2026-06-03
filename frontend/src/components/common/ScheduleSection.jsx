@@ -97,7 +97,7 @@ const ScheduleSection = ({ schedule, onChange, readOnly = false, title }) => {
                 onClick={startEdit}
                 className="flex items-center gap-1 px-3 py-1 rounded-lg border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors"
               >
-                <Edit2 className="w-3 h-3" /> Edit
+                <Edit2 className="w-3 h-3" /> {t('teacherSchedule.edit')}
               </button>
             ) : (
               <>
@@ -106,7 +106,7 @@ const ScheduleSection = ({ schedule, onChange, readOnly = false, title }) => {
                   onClick={confirm}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-400 text-white text-xs font-semibold hover:bg-primary-500 transition-colors"
                 >
-                  <Check className="w-3.5 h-3.5" /> Confirm
+                  <Check className="w-3.5 h-3.5" /> {t('teacherSchedule.confirm')}
                 </button>
                 <button
                   type="button"
@@ -125,7 +125,7 @@ const ScheduleSection = ({ schedule, onChange, readOnly = false, title }) => {
       <div className="p-5">
         {rows.length === 0 && !editing && (
           <p className="text-sm text-slate-400 text-center py-8 rounded-xl border border-dashed border-slate-200 bg-slate-50/50">
-            No availability added yet.
+            {t('teacherSchedule.emptyWeekly')}
           </p>
         )}
 
@@ -169,7 +169,7 @@ const ScheduleSection = ({ schedule, onChange, readOnly = false, title }) => {
               onClick={addSlot}
               className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl border-2 border-dashed border-primary-200 text-xs font-semibold text-primary-500 hover:bg-primary-50 transition-colors"
             >
-              <Plus className="w-3.5 h-3.5" /> Add Time Slot
+              <Plus className="w-3.5 h-3.5" /> {t('teacherSchedule.addSlot')}
             </button>
           </div>
         ) : (

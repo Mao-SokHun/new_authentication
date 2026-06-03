@@ -1,25 +1,30 @@
-import { TEACHER_PROFILE_MOCK } from '@/constants'
+import { EMPTY_TEACHER_PROFILE } from '@/constants'
 
-/** Merge onboarding/auth user fields with mock defaults for teacher profile UI */
-export function resolveTeacherProfile(user, mock = TEACHER_PROFILE_MOCK) {
-  const firstName = user?.firstName ?? mock.firstName
-  const lastName = user?.lastName ?? mock.lastName
+/** Merge auth/API user fields with empty defaults (no mock personas). */
+export function resolveTeacherProfile(user, base = EMPTY_TEACHER_PROFILE) {
+  const firstName = user?.firstName ?? base.firstName
+  const lastName = user?.lastName ?? base.lastName
   const displayName =
-    user?.name?.trim() || `${firstName} ${lastName}`.trim() || mock.displayName
+    user?.name?.trim() || `${firstName} ${lastName}`.trim() || base.displayName
 
   return {
-    ...mock,
+    ...base,
     firstName,
     lastName,
     displayName,
-    title: user?.title || mock.title,
-    phone: user?.phone || mock.phone,
-    gender: user?.gender || mock.gender,
-    experienceYears: user?.experienceYears ?? mock.experienceYears,
-    major: user?.major || mock.major,
-    subject: user?.subject || mock.subject,
-    province: user?.province || mock.province,
-    bio: user?.bio || mock.bio,
-    email: user?.email || mock.email,
+    title: user?.title || base.title,
+    phone: user?.phone || base.phone,
+    gender: user?.gender || base.gender,
+    experienceYears: user?.experienceYears ?? base.experienceYears,
+    workOrganization: user?.workOrganization ?? base.workOrganization,
+    workPosition: user?.workPosition ?? base.workPosition,
+    experience: user?.experience?.length ? user.experience : base.experience,
+    major: user?.major || base.major,
+    subject: user?.subject || base.subject,
+    province: user?.province || base.province,
+    bio: user?.bio || base.bio,
+    email: user?.email || base.email,
+    schedule: user?.schedule?.length ? user.schedule : base.schedule,
+    portfolios: user?.portfolios?.length ? user.portfolios : base.portfolios,
   }
 }

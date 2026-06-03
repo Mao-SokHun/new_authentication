@@ -3,12 +3,8 @@ import { Check, Search } from 'lucide-react'
 import clsx from 'clsx'
 import SearchableSelect from '@/components/ui/SearchableSelect'
 import { useTranslation } from '@/i18n'
-import {
-  majorCommunities,
-  subjectCommunities,
-  findCommunityById,
-  filterCommunities,
-} from '@/constants'
+import { findCommunityById, filterCommunities } from '@/constants'
+import { useCommunities } from '@/hooks/useCommunities'
 
 /**
  * Major / subject community picker.
@@ -42,7 +38,12 @@ const CommunityPicker = ({
     [browseOpenProp, onBrowseOpenChange]
   )
 
+  const { communities: majorCommunities, loading: majorLoading } = useCommunities({ type: 'major' })
+  const { communities: subjectCommunities, loading: subjectLoading } = useCommunities({
+    type: 'subject',
+  })
   const baseList = tab === 'major' ? majorCommunities : subjectCommunities
+  const listLoading = tab === 'major' ? majorLoading : subjectLoading
 
   const filteredList = useMemo(() => {
     const q = searchQuery?.trim().toLowerCase()

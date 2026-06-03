@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import { ChevronRight } from 'lucide-react'
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer
@@ -10,12 +9,8 @@ import {
   DataTable,
   StatMetric,
   PageAmbient,
-  CompleteTeacherProfileModal,
 } from '@/components'
 import { useTranslation } from '@/i18n'
-import { useAuth } from '@/hooks'
-import { isApiEnabled } from '@/constants'
-import { saveMentorFromOnboarding } from '@/services'
 
 const PRIMARY = '#c07888'
 
@@ -97,50 +92,12 @@ const sessionColumns = [
 
 const TeacherHome = () => {
   const { t } = useTranslation()
-  const { updateUser, user } = useAuth()
-  const location = useLocation()
-  const navigate = useNavigate()
-  const [showCompleteTeacherProfile, setShowCompleteTeacherProfile] = useState(
-    () => Boolean(location.state?.showCompleteTeacherProfile)
-  )
   const [period, setPeriod] = useState('Last 7 Days')
   const [page, setPage] = useState(1)
-
-  useEffect(() => {
-    if (location.state?.showCompleteTeacherProfile) {
-      navigate('/teacher/home', { replace: true })
-    }
-  }, [location.state, navigate])
 
   const periodLabels = { 'Today': t('teacherDash.today'), 'Last 7 Days': t('teacherDash.last7Days') }
 
   return (
-    <>
-      <CompleteTeacherProfileModal
-        open={showCompleteTeacherProfile}
-        onComplete={async (profile) => {
-          updateUser({
-            firstName: profile.firstName,
-            lastName: profile.lastName,
-            name: profile.name,
-            title: profile.title,
-            phone: profile.phone,
-            gender: profile.gender,
-            experienceYears: profile.experienceYears,
-            major: profile.major,
-            subject: profile.subject,
-            province: profile.province,
-            bio: profile.bio,
-          })
-
-          if (isApiEnabled()) {
-            await saveMentorFromOnboarding(profile, user?.id)
-          }
-
-          setShowCompleteTeacherProfile(false)
-        }}
-      />
-
       <PageAmbient variant="teacher" className="space-y-5">
       <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-slate-800 via-slate-800 to-slate-900 text-white px-5 py-4">
         <div className="relative z-10">
@@ -244,7 +201,6 @@ const TeacherHome = () => {
         />
       </div>
     </PageAmbient>
-    </>
   )
 }
 

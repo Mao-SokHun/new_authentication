@@ -1,13 +1,17 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { Check, User, BookOpen, Target } from 'lucide-react'
 import Input from '../ui/Input'
 import Button from '../ui/Button'
-import RequiredFieldsHint from './RequiredFieldsHint'
+import SearchableSelect from '../ui/SearchableSelect'
+import RequiredFieldsHint, { FORM_FINE_PRINT_CLASS } from './RequiredFieldsHint'
 import FieldLabel from '../ui/FieldLabel'
 import clsx from 'clsx'
-import { useTranslation } from '@/i18n'
+import { useTranslation, useLocalizedFilterOptions } from '@/i18n'
+import { FILTER_ALL } from '@/constants'
+import { getPhoneDigits, isValidLocalPhone, sanitizePhoneInput } from '@/utils/phoneInput'
+import { validateStudentOnboardingStep1, validateStudentOnboardingStep2 } from '@/lib/studentApiMap'
 
 const SUBJECTS = [
   'Mathematics',
@@ -31,9 +35,15 @@ const GOALS = [
   { id: 'university', value: 'University preparation' },
 ]
 
-const CompleteProfileModal = ({ open, onComplete }) => {
+const CompleteProfileModal = ({ open, onComplete, required = false }) => {
   const { t, labelFor, isKhmer } = useTranslation()
+  const opts = useLocalizedFilterOptions()
+  const locationOptions = useMemo(
+    () => opts.locations.filter((o) => o.value !== FILTER_ALL.location),
+    [opts.locations]
+  )
   const [step, setStep] = useState(1)
+  const [step1Errors, setStep1Errors] = useState(false)
   const [selected, setSelected] = useState([])
   const [selectedGoals, setSelectedGoals] = useState([])
   const [form, setForm] = useState({
@@ -68,6 +78,7 @@ const CompleteProfileModal = ({ open, onComplete }) => {
   useEffect(() => {
     if (open) {
       setStep(1)
+      setStep1Errors(false)
       setSelected([])
       setSelectedGoals([])
       setForm({
@@ -101,12 +112,29 @@ const CompleteProfileModal = ({ open, onComplete }) => {
 
   const setField = (key, value) => setForm((prev) => ({ ...prev, [key]: value }))
 
+  const step1Check = validateStudentOnboardingStep1(form, { locationOptions })
+  const { valid: step1Valid, locationFromList } = step1Check
+
   const canContinue =
-    step === 1
-      ? form.firstName.trim() && form.lastName.trim()
-      : step !== 2 || selected.length > 0
+    step === 1 ? true : step === 2 ? validateStudentOnboardingStep2(selected).valid : true
+
+  const phoneError =
+    step1Errors && !isValidLocalPhone(form.phone)
+      ? getPhoneDigits(form.phone)
+        ? t('auth.phoneInvalid')
+        : t('auth.phoneRequired')
+      : undefined
+
+  const locationError =
+    step1Errors && !locationFromList ? t('auth.locationRequired') : undefined
 
   const handleNext = () => {
+    if (step === 1) {
+      setStep1Errors(true)
+      if (!step1Valid) return
+      setStep(2)
+      return
+    }
     if (step < 3) setStep((s) => s + 1)
     else {
       const firstName = form.firstName.trim()
@@ -115,8 +143,8 @@ const CompleteProfileModal = ({ open, onComplete }) => {
         firstName,
         lastName,
         name: `${firstName} ${lastName}`.trim(),
-        location: form.location.trim(),
-        phone: form.phone.trim(),
+        location: form.location,
+        phone: getPhoneDigits(form.phone),
         bio: form.bio.trim(),
         interests: selected,
         goals: selectedGoals,
@@ -134,7 +162,10 @@ const CompleteProfileModal = ({ open, onComplete }) => {
       <div className="absolute inset-0 bg-slate-900/45 backdrop-blur-sm" aria-hidden />
 
       <section
-        className="relative w-full max-w-md max-h-[min(90vh,780px)] flex flex-col overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-slate-200/80"
+        className={clsx(
+          'relative w-full max-w-md max-h-[min(90vh,780px)] flex flex-col overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-slate-200/80',
+          isKhmer && 'font-khmer'
+        )}
         role="dialog"
         aria-modal="true"
         aria-labelledby="complete-profile-title"
@@ -197,6 +228,11 @@ const CompleteProfileModal = ({ open, onComplete }) => {
                   {t('studentOnboarding.title')}
                 </h2>
                 <p className="text-slate-500 text-sm mt-1">{t('studentOnboarding.subtitle')}</p>
+                {required && (
+                  <p className="mt-2 text-xs font-medium text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                    {t('profileCompletion.gateNote')}
+                  </p>
+                )}
               </div>
               <RequiredFieldsHint>{t('auth.requiredFieldsHint')}</RequiredFieldsHint>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -205,6 +241,7 @@ const CompleteProfileModal = ({ open, onComplete }) => {
                   placeholder={t('studentOnboarding.lastNamePlaceholder')}
                   value={form.lastName}
                   onChange={(e) => setField('lastName', e.target.value)}
+                  error={step1Errors && !form.lastName.trim() ? t('auth.lastNameRequired') : undefined}
                   required
                 />
                 <Input
@@ -212,25 +249,30 @@ const CompleteProfileModal = ({ open, onComplete }) => {
                   placeholder={t('studentOnboarding.firstNamePlaceholder')}
                   value={form.firstName}
                   onChange={(e) => setField('firstName', e.target.value)}
+                  error={step1Errors && !form.firstName.trim() ? t('auth.firstNameRequired') : undefined}
                   required
                 />
               </div>
-              <Input
+              <SearchableSelect
                 label={t('studentOnboarding.location')}
-                placeholder={t('studentOnboarding.locationPlaceholder')}
                 value={form.location}
-                onChange={(e) => setField('location', e.target.value)}
-                optional
-                optionalLabel={t('auth.optional')}
+                onChange={(location) => setField('location', location)}
+                options={locationOptions}
+                placeholder={t('common.typeToSearch')}
+                error={locationError}
+                required
               />
               <Input
                 label={t('studentOnboarding.phone')}
                 type="tel"
+                inputMode="numeric"
+                autoComplete="tel"
                 placeholder={t('studentOnboarding.phonePlaceholder')}
                 value={form.phone}
-                onChange={(e) => setField('phone', e.target.value)}
-                optional
-                optionalLabel={t('auth.optional')}
+                onChange={(e) => setField('phone', sanitizePhoneInput(e.target.value))}
+                maxLength={10}
+                error={phoneError}
+                required
               />
               <div>
                 <FieldLabel
@@ -258,7 +300,7 @@ const CompleteProfileModal = ({ open, onComplete }) => {
                 <p className="text-slate-500 text-sm mt-1">
                   {t('studentOnboarding.interestsSubtitle')}
                 </p>
-                <p className="text-sm text-slate-500 mt-2">{t('auth.requiredFieldsHint')}</p>
+                <RequiredFieldsHint className="mt-2">{t('auth.requiredFieldsHint')}</RequiredFieldsHint>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 {SUBJECTS.map((s) => (
@@ -358,7 +400,7 @@ const CompleteProfileModal = ({ open, onComplete }) => {
             </div>
           </div>
 
-          <p className="text-center text-xs text-slate-500 mt-3 leading-relaxed">
+          <p className={clsx(FORM_FINE_PRINT_CLASS, 'text-center mt-3', isKhmer && 'font-khmer')}>
             {t('auth.agreeTerms')}{' '}
             <Link to="/terms" className="text-primary-600 hover:underline">
               {t('auth.terms')}

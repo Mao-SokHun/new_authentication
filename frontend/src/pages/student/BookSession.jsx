@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
+import { useTeacher } from '@/hooks'
+import { useTranslation } from '@/i18n'
 import {
   ChevronLeft, ChevronRight, Calendar, Clock, CreditCard, CheckCircle,
   Star, Video, BookOpen, Zap, Shield
@@ -11,18 +13,6 @@ import { Stepper } from '@/components'
 import { PageCard, PageScaffold } from '@/components'
 import StandalonePageShell from '../../components/layout/StandalonePageShell'
 import clsx from 'clsx'
-
-const teacher = {
-  name: 'Dr. Sarah Jenkins',
-  title: 'Senior Math Educator',
-  rating: 4.9,
-  reviews: 312,
-  avatar: null,
-  subjects: ['Mathematics', 'Calculus', 'Statistics'],
-  rate: 25,
-  currency: '$',
-  location: 'Online',
-}
 
 const topics = [
   { id: 'calc', label: 'Calculus', icon: '∫', desc: 'Derivatives, integrals, limits' },
@@ -57,8 +47,24 @@ const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep
 const steps = ['Topic', 'Schedule', 'Payment', 'Confirm']
 
 const BookSession = () => {
+  const { t } = useTranslation()
   const { teacherId } = useParams()
   const navigate = useNavigate()
+  const { teacher: row, loading, error } = useTeacher(teacherId)
+
+  const teacher = row
+    ? {
+        name: row.name,
+        title: row.title ?? '',
+        rating: row.rating ?? 0,
+        reviews: row.reviews ?? 0,
+        avatar: row.avatar ?? null,
+        subjects: row.subjects ?? [],
+        rate: row.rate ?? 0,
+        currency: '$',
+        location: row.location ?? 'Online',
+      }
+    : null
 
   const [step, setStep] = useState(0)
   const [selectedTopic, setSelectedTopic] = useState(null)
@@ -68,6 +74,27 @@ const BookSession = () => {
   const [notes, setNotes] = useState('')
   const [payMethod, setPayMethod] = useState('card')
   const [booked, setBooked] = useState(false)
+
+  if (loading) {
+    return (
+      <StandalonePageShell>
+        <div className="py-16 text-center text-slate-500">{t('student.loadingTeachers')}</div>
+      </StandalonePageShell>
+    )
+  }
+
+  if (error || !teacher) {
+    return (
+      <StandalonePageShell>
+        <div className="py-16 text-center text-slate-600">{t('student.noTeachers')}</div>
+        <div className="text-center mt-4">
+          <Link to="/schedule" className="text-sm text-primary-600 hover:underline">
+            {t('student.browseSchedule')}
+          </Link>
+        </div>
+      </StandalonePageShell>
+    )
+  }
 
   const days = getDays()
   const dur = durations.find(d => d.id === selectedDuration) || durations[1]

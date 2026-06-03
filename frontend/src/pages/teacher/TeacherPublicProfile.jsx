@@ -1,30 +1,37 @@
 import { useState } from 'react'
 import { CheckCircle, MapPin, Users, Clock, Globe, BookOpen, Star, MessageCircle, Share2, Heart, Award, ArrowLeft, Video, Calendar } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import Avatar from '../../components/ui/Avatar'
 import Badge from '../../components/ui/Badge'
 import Button from '../../components/ui/Button'
 import StarRating from '../../components/ui/StarRating'
-import { teachers } from '@/constants'
+import { useTeacher } from '@/hooks'
+import { useTranslation } from '@/i18n'
 import clsx from 'clsx'
 
-const teacher = teachers[1]
-
-const reviews = [
-  { author: 'Sokha Dara', avatar: null, rating: 5, time: '2 weeks ago', text: 'Absolutely incredible teacher! Dr. Phe explains complex ML concepts with clarity and patience. Highly recommend to anyone serious about data science.' },
-  { author: 'Bopha Keo', avatar: null, rating: 5, time: '1 month ago', text: 'My grades improved dramatically after just 4 sessions. The personalized approach makes all the difference.' },
-  { author: 'Dara Chan', avatar: null, rating: 4, time: '1 month ago', text: 'Very knowledgeable and engaging. Sometimes goes too fast but always happy to revisit topics.' },
-  { author: 'Linda Chea', avatar: null, rating: 5, time: '6 weeks ago', text: 'Best decision I made this year. Dr. Sophy made statistics actually enjoyable!' },
-]
-
-const timeSlots = ['9:00 AM', '10:30 AM', '1:00 PM', '2:30 PM', '4:00 PM', '5:30 PM']
-
 const TeacherPublicProfile = () => {
+  const { t } = useTranslation()
+  const { id } = useParams()
+  const { teacher, loading, error } = useTeacher(id)
+  const reviews = []
+  const timeSlots = []
   const [selectedSlot, setSelectedSlot] = useState(0)
   const [liked, setLiked] = useState(false)
   const [activeTab, setActiveTab] = useState('About')
 
   const tabs = ['About', 'Reviews', 'Availability']
+
+  if (loading) {
+    return (
+      <div className="py-12 text-center text-slate-500">{t('student.loadingTeachers')}</div>
+    )
+  }
+
+  if (error || !teacher) {
+    return (
+      <div className="py-12 text-center text-slate-600">{t('student.noTeachers')}</div>
+    )
+  }
 
   return (
     <div className="space-y-6">

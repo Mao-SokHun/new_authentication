@@ -1,5 +1,4 @@
 import { apiRequest, isApiEnabled } from '../core/api'
-import { scheduleEvents as mockSessions } from '@/constants'
 
 const ENDPOINTS = {
   list: '/sessions',
@@ -7,36 +6,28 @@ const ENDPOINTS = {
 }
 
 export async function fetchSessions() {
-  if (isApiEnabled()) {
-    const json = await apiRequest(ENDPOINTS.list)
-    return Array.isArray(json) ? json : (json.data ?? [])
-  }
-  return mockSessions
+  if (!isApiEnabled()) return []
+  const json = await apiRequest(ENDPOINTS.list)
+  return Array.isArray(json) ? json : (json.data ?? [])
 }
 
 export async function createSession(payload) {
-  if (isApiEnabled()) {
-    return apiRequest(ENDPOINTS.list, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    })
-  }
-  return { id: `mock-${Date.now()}`, ...payload, status: 'upcoming' }
+  if (!isApiEnabled()) return null
+  return apiRequest(ENDPOINTS.list, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
 }
 
 export async function updateSession(id, payload) {
-  if (isApiEnabled()) {
-    return apiRequest(ENDPOINTS.byId(id), {
-      method: 'PUT',
-      body: JSON.stringify(payload),
-    })
-  }
-  return { id, ...payload }
+  if (!isApiEnabled()) return null
+  return apiRequest(ENDPOINTS.byId(id), {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  })
 }
 
 export async function deleteSession(id) {
-  if (isApiEnabled()) {
-    return apiRequest(ENDPOINTS.byId(id), { method: 'DELETE' })
-  }
-  return { success: true }
+  if (!isApiEnabled()) return null
+  return apiRequest(ENDPOINTS.byId(id), { method: 'DELETE' })
 }

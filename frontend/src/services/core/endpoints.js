@@ -41,6 +41,8 @@ export const ENDPOINTS = {
     register: '/auth/register',
     logout: '/auth/logout',
     me: '/auth/profile',
+    /** PUT — extend when backend adds profile fields on users table */
+    updateProfile: '/auth/profile',
     deleteAccount: '/auth/delete-user',
     verifyLoginOtp: '/auth/verify-otp',
     forgotPassword: '/auth/forgot-password',
@@ -79,6 +81,14 @@ export const ENDPOINTS = {
   users: {
     list: '/users',
     byId: (id) => `/users/${id}`,
+  },
+
+  /**
+   * Student profile — your team implements mount e.g. app.use('/api/v1/students', ...)
+   * Frontend calls GET/PUT /api/v1/students/me (cookie session).
+   */
+  students: {
+    me: '/v1/students/me',
   },
 
   admin: {

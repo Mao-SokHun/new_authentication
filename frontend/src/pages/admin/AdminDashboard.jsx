@@ -6,50 +6,20 @@ import { PageHeader, PageCard, StatMetric, TabBar } from '@/components'
 import clsx from 'clsx'
 import { useTranslation } from '@/i18n'
 
-const monthlyData = [
-  { month: 'Jan', students: 820, teachers: 62, revenue: 18400 },
-  { month: 'Feb', students: 940, teachers: 71, revenue: 21200 },
-  { month: 'Mar', students: 1100, teachers: 80, revenue: 24800 },
-  { month: 'Apr', students: 1340, teachers: 95, revenue: 30200 },
-  { month: 'May', students: 1580, teachers: 108, revenue: 35600 },
-  { month: 'Jun', students: 1872, teachers: 124, revenue: 42200 },
-  { month: 'Jul', students: 2100, teachers: 138, revenue: 47300 },
-  { month: 'Aug', students: 2340, teachers: 150, revenue: 52700 },
-  { month: 'Sep', students: 2780, teachers: 165, revenue: 62600 },
-  { month: 'Oct', students: 3200, teachers: 180, revenue: 72000 },
-  { month: 'Nov', students: 3750, teachers: 200, revenue: 84400 },
-  { month: 'Dec', students: 4034, teachers: 214, revenue: 90900 },
-]
-
-const recentActivity = [
-  { user: 'Sokha Dara', action: 'Booked a session with Dr. Sarah Jenkins', time: '2 min ago', type: 'booking' },
-  { user: 'Dr. Phe Sophy', action: 'Updated their profile and availability', time: '15 min ago', type: 'update' },
-  { user: 'Bopha Keo', action: 'Left a 5-star review for Dr. James Wilson', time: '32 min ago', type: 'review' },
-  { user: 'Dara Chan', action: 'Joined the Mathematics Hub community', time: '1 hr ago', type: 'join' },
-  { user: 'Linda Chea', action: 'Completed IELTS Writing session', time: '2 hrs ago', type: 'complete' },
-  { user: 'New Teacher', action: 'Applied to join as a teacher', time: '3 hrs ago', type: 'apply' },
-]
-
+const monthlyData = []
+const recentActivity = []
 const activityDot = { booking: 'bg-primary-300', update: 'bg-slate-400', review: 'bg-amber-400', join: 'bg-emerald-400', complete: 'bg-blue-400', apply: 'bg-primary-300' }
-
-const subjectData = [
-  { subject: 'Math', sessions: 1240 },
-  { subject: 'English', sessions: 1890 },
-  { subject: 'Sci', sessions: 980 },
-  { subject: 'DS', sessions: 756 },
-  { subject: 'Code', sessions: 634 },
-  { subject: 'Physics', sessions: 512 },
-]
+const subjectData = []
 
 const AdminDashboard = () => {
   const [metric, setMetric] = useState('students')
   const { t } = useTranslation()
 
   const kpis = [
-    { label: t('adminDash.totalStudents'), value: '4,034', change: '+12.3%', icon: Users, tone: 'primary' },
-    { label: t('adminDash.activeTeachers'), value: '88', change: '+8%', icon: BookOpen, tone: 'success' },
-    { label: t('adminDash.monthlyRevenue'), value: '$90.9K', change: '+18.5%', icon: DollarSign, tone: 'primary' },
-    { label: t('adminDash.sessionRate'), value: '75.4%', change: '+2.1%', icon: TrendingUp, tone: 'warning' },
+    { label: t('adminDash.totalStudents'), value: '—', change: '', icon: Users, tone: 'primary' },
+    { label: t('adminDash.activeTeachers'), value: '—', change: '', icon: BookOpen, tone: 'success' },
+    { label: t('adminDash.monthlyRevenue'), value: '—', change: '', icon: DollarSign, tone: 'primary' },
+    { label: t('adminDash.sessionRate'), value: '—', change: '', icon: TrendingUp, tone: 'warning' },
   ]
 
   return (

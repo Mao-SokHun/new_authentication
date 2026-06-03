@@ -12,28 +12,8 @@ const systemHealth = [
   { label: 'Auth Service', status: 'operational', uptime: '99.99%', icon: Shield },
 ]
 
-const activityLog = [
-  { id: 1, event: 'New teacher application submitted', user: 'Dr. Nguyen Van An', type: 'info', time: '2 min ago' },
-  { id: 2, event: 'Failed login attempt (3×) — account locked', user: 'dara.chan@gmail.com', type: 'warning', time: '18 min ago' },
-  { id: 3, event: 'Payment processed successfully', user: 'Sokha Dara', type: 'success', time: '32 min ago' },
-  { id: 4, event: 'Community flagged for inappropriate content', user: 'Unknown Community', type: 'danger', time: '1 hr ago' },
-  { id: 5, event: 'Backup completed (1.4 GB)', user: 'System', type: 'success', time: '2 hrs ago' },
-  { id: 6, event: 'WebSocket connection spike — 1,200 concurrent', user: 'System', type: 'warning', time: '3 hrs ago' },
-  { id: 7, event: 'New sub-admin role created', user: 'Super Admin', type: 'info', time: '4 hrs ago' },
-  { id: 8, event: 'Database query latency exceeded threshold', user: 'System', type: 'warning', time: '5 hrs ago' },
-  { id: 9, event: 'Session completed: Math Advanced', user: 'Dr. Sarah Jenkins', type: 'success', time: '6 hrs ago' },
-  { id: 10, event: 'Malicious URL detected in post', user: 'Post #8234', type: 'danger', time: '8 hrs ago' },
-]
-
-const responseTimeData = [
-  { time: '00:00', api: 120, db: 45 },
-  { time: '04:00', api: 98, db: 38 },
-  { time: '08:00', api: 210, db: 88 },
-  { time: '12:00', api: 340, db: 125 },
-  { time: '16:00', api: 280, db: 102 },
-  { time: '20:00', api: 190, db: 70 },
-  { time: '23:59', api: 145, db: 52 },
-]
+const activityLog = []
+const responseTimeData = []
 
 const typeConfig = {
   info: { badge: 'info', icon: <Activity className="w-3.5 h-3.5 text-slate-500" />, row: 'hover:bg-slate-50/50' },

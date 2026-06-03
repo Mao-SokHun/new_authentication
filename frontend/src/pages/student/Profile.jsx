@@ -4,15 +4,14 @@ import { useAuth } from '@/hooks'
 import { PageScaffold, PageCard, PageAmbient } from '@/components'
 import { useTranslation } from '@/i18n'
 import Avatar from '../../components/ui/Avatar'
+import { resolveStudentProfile } from '@/lib/studentProfile'
 
 const Profile = () => {
   const { user } = useAuth()
   const { t, labelFor } = useTranslation()
-  const displayName = user?.name || t('auth.student')
-  const firstName = displayName.split(' ')[0]
-  const studentId = user?.id?.toString().padStart(5, '0') || '10001'
-  const learningFocus = 'IT'
-  const location = 'Phnom Penh'
+  const profile = resolveStudentProfile(user)
+  const displayName = profile.displayName || t('auth.student')
+  const studentId = user?.id ? String(user.id).padStart(5, '0') : '—'
 
   return (
     <PageAmbient variant="ambient">
@@ -39,14 +38,18 @@ const Profile = () => {
               </p>
             </div>
             <div className="flex flex-col gap-2 w-full pt-3 border-t border-slate-100 text-sm text-slate-600">
-              <p className="flex items-center justify-center gap-2">
-                <GraduationCap className="w-4 h-4 text-primary-500" />
-                {labelFor(learningFocus)}
-              </p>
-              <p className="flex items-center justify-center gap-2">
-                <MapPin className="w-4 h-4 text-primary-500" />
-                {labelFor(location)}
-              </p>
+              {profile.learningFocus ? (
+                <p className="flex items-center justify-center gap-2">
+                  <GraduationCap className="w-4 h-4 text-primary-500" />
+                  {labelFor(profile.learningFocus)}
+                </p>
+              ) : null}
+              {profile.location || profile.province ? (
+                <p className="flex items-center justify-center gap-2">
+                  <MapPin className="w-4 h-4 text-primary-500" />
+                  {labelFor(profile.location || profile.province)}
+                </p>
+              ) : null}
             </div>
           </PageCard>
 
@@ -60,7 +63,7 @@ const Profile = () => {
                   </div>
                   <div>
                     <p className="text-xs text-slate-400">{t('profile.email')}</p>
-                    <p className="text-sm font-medium text-slate-700 truncate">{user?.email || '—'}</p>
+                    <p className="text-sm font-medium text-slate-700 truncate">{profile.email || '—'}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -69,7 +72,7 @@ const Profile = () => {
                   </div>
                   <div>
                     <p className="text-xs text-slate-400">{t('profile.mobile')}</p>
-                    <p className="text-sm font-medium text-slate-700">+855 12 345 678</p>
+                    <p className="text-sm font-medium text-slate-700">{profile.phone || '—'}</p>
                   </div>
                 </div>
               </div>
@@ -78,9 +81,25 @@ const Profile = () => {
             <PageCard>
               <h3 className="font-bold text-slate-800 text-sm mb-2">{t('profile.aboutMe')}</h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                {t('profile.defaultBio', { name: firstName })}
+                {profile.bio || t('profile.noBio')}
               </p>
             </PageCard>
+
+            {profile.interests.length > 0 && (
+              <PageCard>
+                <h3 className="font-bold text-slate-800 text-sm mb-3">{t('profile.learningPreferences')}</h3>
+                <div className="flex flex-wrap gap-2">
+                  {profile.interests.map((s) => (
+                    <span
+                      key={s}
+                      className="px-3 py-1 rounded-lg bg-primary-50 text-primary-700 text-xs font-medium"
+                    >
+                      {labelFor(s)}
+                    </span>
+                  ))}
+                </div>
+              </PageCard>
+            )}
           </div>
         </div>
       </PageScaffold>

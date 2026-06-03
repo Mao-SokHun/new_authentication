@@ -7,9 +7,9 @@ export async function fetchAdminReports() {
     return apiRequest(ENDPOINTS.admin.reports)
   }
   return {
-    users: 1240,
-    teachers: 86,
-    sessions: 432,
-    revenue: 12450,
+    users: 0,
+    teachers: 0,
+    sessions: 0,
+    revenue: 0,
   }
 }

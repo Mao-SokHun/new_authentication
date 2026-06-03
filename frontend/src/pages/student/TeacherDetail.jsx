@@ -1,34 +1,45 @@
 import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import { useTeacher } from '@/hooks'
+import { useTranslation } from '@/i18n'
 import {
   ArrowLeft, CheckCircle, MapPin, Clock, Globe, BookOpen, Star,
   MessageCircle, Award, Calendar, GraduationCap, Users, Zap
 } from 'lucide-react'
 import Badge from '../../components/ui/Badge'
 import StarRating from '../../components/ui/StarRating'
-import { teachers } from '@/constants'
 import { PageCard, TabBar } from '@/components'
 import clsx from 'clsx'
 
-const reviews = [
-  { author: 'Sokha D.', rating: 5, time: '2 weeks ago', text: 'Absolutely incredible teacher! Explains complex concepts with clarity and patience. Highly recommend!' },
-  { author: 'Bopha K.', rating: 5, time: '1 month ago', text: 'My grades improved dramatically after just 4 sessions. The personalized approach makes all the difference.' },
-  { author: 'Dara C.', rating: 4, time: '1 month ago', text: 'Very knowledgeable and engaging. Sometimes goes too fast but always happy to revisit topics.' },
-]
-
-const credentials = [
-  { icon: GraduationCap, text: 'M.Sc in Applied Mathematics', sub: 'Royal University of Phnom Penh, 2016' },
-  { icon: Award, text: 'Certified Instructor', sub: 'Ministry of Education, Cambodia' },
-  { icon: BookOpen, text: 'Published Author', sub: '3 academic papers in data science' },
-]
-
-const timeSlots = ['9:00 AM', '10:30 AM', '1:00 PM', '2:30 PM', '4:00 PM', '5:30 PM']
-
 const TeacherDetail = () => {
+  const { t } = useTranslation()
   const { id } = useParams()
-  const teacher = teachers.find((t) => t.id === id) || teachers[1]
+  const { teacher, loading, error } = useTeacher(id)
   const [selectedSlot, setSelectedSlot] = useState(null)
   const [tab, setTab] = useState('biography')
+
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-12 text-center text-slate-500">
+        {t('student.loadingTeachers')}
+      </div>
+    )
+  }
+
+  if (error || !teacher) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-12 text-center">
+        <p className="text-slate-600 font-medium">{t('student.noTeachers')}</p>
+        <Link to="/schedule" className="text-primary-600 text-sm mt-4 inline-block">
+          {t('student.browseSchedule')}
+        </Link>
+      </div>
+    )
+  }
+
+  const reviews = []
+  const credentials = []
+  const timeSlots = []
 
   const tabs = [
     { id: 'biography', label: 'Biography' },

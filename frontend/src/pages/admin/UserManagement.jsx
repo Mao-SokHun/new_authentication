@@ -7,18 +7,7 @@ import Input from '../../components/ui/Input'
 import { PageScaffold, PageCard, StatMetric, DataTable } from '@/components'
 import clsx from 'clsx'
 
-const allUsers = [
-  { id: 1, name: 'Sokha Dara', email: 'sokha@example.com', role: 'student', status: 'active', sessions: 48, joined: '2025-01-15' },
-  { id: 2, name: 'Dr. Phe Sophy', email: 'phe@example.com', role: 'teacher', status: 'active', sessions: 436, joined: '2024-08-10' },
-  { id: 3, name: 'Bopha Keo', email: 'bopha@example.com', role: 'student', status: 'active', sessions: 32, joined: '2025-03-22' },
-  { id: 4, name: 'Dr. Sarah Jenkins', email: 'sarah@example.com', role: 'teacher', status: 'active', sessions: 312, joined: '2024-06-05' },
-  { id: 5, name: 'Dara Chan', email: 'dara@example.com', role: 'student', status: 'inactive', sessions: 12, joined: '2025-05-01' },
-  { id: 6, name: 'Dr. James Wilson', email: 'james@example.com', role: 'teacher', status: 'pending', sessions: 189, joined: '2024-11-18' },
-  { id: 7, name: 'Maly Sim', email: 'maly@example.com', role: 'student', status: 'active', sessions: 27, joined: '2025-02-14' },
-  { id: 8, name: 'Ms. Linda Chea', email: 'linda@example.com', role: 'teacher', status: 'active', sessions: 421, joined: '2024-07-30' },
-  { id: 9, name: 'Rathana Ky', email: 'rathana@example.com', role: 'student', status: 'active', sessions: 19, joined: '2025-04-08' },
-  { id: 10, name: 'Visal Roth', email: 'visal@example.com', role: 'student', status: 'inactive', sessions: 5, joined: '2025-05-15' },
-]
+const allUsers = []
 
 const statusConfig = { active: { variant: 'success', label: 'Active' }, inactive: { variant: 'neutral', label: 'Inactive' }, pending: { variant: 'warning', label: 'Pending' } }
 const roleConfig = { student: { variant: 'primary', label: 'Student' }, teacher: { variant: 'info', label: 'Teacher' } }

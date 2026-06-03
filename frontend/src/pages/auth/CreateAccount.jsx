@@ -8,7 +8,7 @@ import AuthLayout from '@/components/layout/AuthLayout'
 import clsx from 'clsx'
 import { useTranslation } from '@/i18n'
 import { useAuth } from '@/hooks'
-import RequiredFieldsHint from '@/components/common/RequiredFieldsHint'
+import RequiredFieldsHint, { FORM_FINE_PRINT_CLASS } from '@/components/common/RequiredFieldsHint'
 
 const CreateAccount = () => {
   const { t, isKhmer } = useTranslation()
@@ -42,9 +42,9 @@ const CreateAccount = () => {
     try {
       const user = await register({ email, password, role })
       if (user.role === 'student') {
-        navigate('/home', { state: { showCompleteProfile: true } })
+        navigate('/home')
       } else {
-        navigate('/teacher/home', { state: { showCompleteTeacherProfile: true } })
+        navigate('/teacher/home')
       }
     } catch (err) {
       setError(err.message || t('auth.signupFailed'))
@@ -120,7 +120,7 @@ const CreateAccount = () => {
           >
             {agreed && <Check className="w-3 h-3 text-white" />}
           </button>
-          <span className={clsx('text-base text-slate-600', isKhmer ? 'leading-normal' : 'leading-relaxed')}>
+          <span className={clsx(FORM_FINE_PRINT_CLASS, 'text-slate-600', isKhmer && 'font-khmer')}>
             <span className="text-red-500 font-bold mr-0.5" aria-hidden="true">*</span>
             {t('auth.agreeRokkruPrefix')}{' '}
             <Link to="/terms" className="text-primary-600 hover:underline font-medium">
@@ -166,7 +166,7 @@ const CreateAccount = () => {
         </button>
       </div>
 
-      <p className={clsx('text-sm text-slate-500 text-center mt-8', isKhmer ? 'leading-normal' : 'leading-relaxed')}>
+      <p className={clsx(FORM_FINE_PRINT_CLASS, 'text-center mt-8', isKhmer && 'font-khmer')}>
         {t('auth.agreeTerms')}{' '}
         <Link to="/terms" className="text-primary-600 hover:underline">
           {t('auth.terms')}

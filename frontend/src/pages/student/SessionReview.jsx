@@ -7,7 +7,7 @@ import Button from '../../components/ui/Button'
 import clsx from 'clsx'
 import StandalonePageShell from '../../components/layout/StandalonePageShell'
 
-const teacher = { name: 'Dr. Sarah Jenkins', title: 'Senior Math Educator', subject: 'Calculus', date: 'May 19, 2026', duration: '60 min' }
+const teacher = { name: '', title: '', subject: '', date: '', duration: '' }
 
 const aspects = [
   { id: 'explanation', label: 'Clarity of Explanation' },
@@ -22,11 +22,7 @@ const tags = {
   negative: ['Too fast', 'Not enough examples', 'Hard to follow', 'Connection issues', 'Started late', 'Needs improvement'],
 }
 
-const quickReviews = [
-  'Amazing session! Dr. Jenkins has a talent for making complex topics feel simple.',
-  'Very helpful and patient. Walked me through every step without rushing.',
-  'Great explanation of the chain rule. Finally understood it after weeks of confusion!',
-]
+const quickReviews = []
 
 const SessionReview = () => {
   const navigate = useNavigate()

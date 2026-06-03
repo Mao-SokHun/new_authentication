@@ -55,11 +55,11 @@ const PublicNavbar = () => {
           ))}
         </nav>
 
-        <div className="hidden sm:flex flex-1 max-w-xs ml-auto">
+        <div className="hidden sm:flex min-w-0 w-52 sm:w-60 md:w-72 lg:w-80 max-w-[min(100vw-12rem,26rem)] ml-auto">
           <input
             type="search"
             placeholder={t('search.tutors')}
-            className="w-full px-4 py-2 text-sm glass-subtle rounded-full placeholder-slate-500 text-slate-800 outline-none focus:ring-2 focus:ring-primary-200/80 border border-white/60"
+            className="w-full min-w-0 px-4 py-2 text-sm glass-subtle rounded-full placeholder-slate-500 text-slate-800 outline-none focus:ring-2 focus:ring-primary-200/80 border border-white/60"
           />
         </div>
 

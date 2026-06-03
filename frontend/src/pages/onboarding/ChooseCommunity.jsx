@@ -3,11 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { Check, Users } from 'lucide-react'
 import Button from '../../components/ui/Button'
 import { PageCard, RokkruLogo } from '@/components'
-import {
-  majorCommunities,
-  subjectCommunities,
-  filterCommunities,
-} from '@/constants'
+import { filterCommunities } from '@/constants'
+import { useCommunities } from '@/hooks/useCommunities'
 import clsx from 'clsx'
 
 const ChooseCommunity = () => {
@@ -16,10 +13,17 @@ const ChooseCommunity = () => {
   const [search, setSearch] = useState('')
   const navigate = useNavigate()
 
+  const { communities: majorCommunities, loading: majorLoading } = useCommunities({ type: 'major' })
+  const { communities: subjectCommunities, loading: subjectLoading } = useCommunities({
+    type: 'subject',
+  })
+
   const list = useMemo(() => {
     const base = tab === 'major' ? majorCommunities : subjectCommunities
     return filterCommunities(base, search)
-  }, [tab, search])
+  }, [tab, search, majorCommunities, subjectCommunities])
+
+  const loading = tab === 'major' ? majorLoading : subjectLoading
 
   const toggle = (id) =>
     setJoined((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
@@ -69,7 +73,10 @@ const ChooseCommunity = () => {
           </div>
 
           <div className="p-6 space-y-3 max-h-[28rem] overflow-y-auto">
-            {list.map((c) => {
+            {loading && (
+              <p className="text-sm text-slate-500 text-center py-6">Loading communities…</p>
+            )}
+            {!loading && list.map((c) => {
               const isJoined = joined.includes(c.id)
               return (
                 <button
@@ -113,8 +120,10 @@ const ChooseCommunity = () => {
                 </button>
               )
             })}
-            {list.length === 0 && (
-              <p className="text-sm text-slate-500 text-center py-6">No communities match your search.</p>
+            {!loading && list.length === 0 && (
+              <p className="text-sm text-slate-500 text-center py-6">
+                {search ? 'No communities match your search.' : 'No communities available yet.'}
+              </p>
             )}
           </div>
 

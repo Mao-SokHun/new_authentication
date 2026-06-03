@@ -9,10 +9,9 @@ export * from './filters/majorSubjects'
 export * from './filters/languageSubjects'
 export * from './filters/generalKnowledgeSubjects'
 
-export * from './mock/mockData'
-export * from './mock/teacherProfileMock'
-export * from './mock/communities'
-export * from './mock/communityFeed'
+export * from './teacher/teacherDefaults'
+export * from './student/studentDefaults'
+export * from './communities/communityUi'
 
 export * from './legal/legalContent'
 

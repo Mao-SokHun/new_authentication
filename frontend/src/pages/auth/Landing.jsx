@@ -5,19 +5,15 @@ import Button from '../../components/ui/Button'
 import Avatar from '../../components/ui/Avatar'
 import { PublicNavbar, AppFooter, TeacherRowCard, AnimatedBackground } from '@/components'
 import { useTranslation } from '@/i18n'
-import { teachers } from '@/constants'
+import { useTeachers } from '@/hooks'
 
 const Landing = () => {
   const { t, isKhmer } = useTranslation()
+  const { teachers, loading: teachersLoading } = useTeachers({ page: 1, pageSize: 4 })
   const features = t('landing.features')
   const featureList = Array.isArray(features) ? features : []
 
-  const stats = [
-    { value: '12,000+', label: t('landing.statStudents') },
-    { value: '800+', label: t('landing.statTeachers') },
-    { value: '50+', label: t('landing.statSubjects') },
-    { value: '4.9★', label: t('landing.statRating') },
-  ]
+  const stats = []
 
   return (
     <div className="min-h-screen flex flex-col glass-ios-26-shell">
@@ -82,29 +78,33 @@ const Landing = () => {
                 </Button>
               </Link>
             </div>
-            <div className="flex items-center gap-3 mt-8">
-              <div className="flex -space-x-2">
-                {['Alex', 'Sokha', 'Bopha', 'Dara'].map((name) => (
-                  <Avatar key={name} name={name} size="sm" className="ring-2 ring-slate-800" />
-                ))}
+            {teachers.length > 0 && (
+              <div className="flex items-center gap-3 mt-8">
+                <div className="flex -space-x-2">
+                  {teachers.slice(0, 4).map((tchr) => (
+                    <Avatar key={tchr.id} name={tchr.name} size="sm" className="ring-2 ring-slate-800" />
+                  ))}
+                </div>
+                <p className={clsx('text-slate-300', isKhmer ? 'text-lg sm:text-xl' : 'text-base')}>
+                  {t('landing.studentsLearning')}
+                </p>
               </div>
-              <p className={clsx('text-slate-300', isKhmer ? 'text-lg sm:text-xl' : 'text-base')}>
-                <span className="font-semibold text-white">12,000+</span> {t('landing.studentsLearning')}
-              </p>
-            </div>
+            )}
           </div>
         </div>
 
-        <div className="relative border-t border-white/10 bg-white/5 backdrop-blur-xl">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 sm:py-8 grid grid-cols-2 md:grid-cols-4 gap-6">
-            {stats.map((s) => (
-              <div key={s.label} className="text-center">
-                <p className="text-3xl sm:text-4xl font-bold text-white">{s.value}</p>
-                <p className={clsx('text-slate-300 mt-1', isKhmer ? 'text-base sm:text-lg' : 'text-sm')}>{s.label}</p>
-              </div>
-            ))}
+        {stats.length > 0 && (
+          <div className="relative border-t border-white/10 bg-white/5 backdrop-blur-xl">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 sm:py-8 grid grid-cols-2 md:grid-cols-4 gap-6">
+              {stats.map((s) => (
+                <div key={s.label} className="text-center">
+                  <p className="text-3xl sm:text-4xl font-bold text-white">{s.value}</p>
+                  <p className={clsx('text-slate-300 mt-1', isKhmer ? 'text-base sm:text-lg' : 'text-sm')}>{s.label}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </section>
 
       <section id="teachers" className="relative py-20 overflow-hidden">
@@ -127,7 +127,13 @@ const Landing = () => {
             </Link>
           </div>
           <div className="space-y-4">
-            {teachers.slice(0, 4).map((teacher) => (
+            {teachersLoading && (
+              <p className="text-on-glass-muted text-sm">{t('student.loadingTeachers')}</p>
+            )}
+            {!teachersLoading && teachers.length === 0 && (
+              <p className="text-on-glass-muted text-sm">{t('student.noTeachers')}</p>
+            )}
+            {teachers.map((teacher) => (
               <TeacherRowCard key={teacher.id} teacher={teacher} />
             ))}
           </div>

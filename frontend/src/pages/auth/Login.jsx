@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks'
 import { useTranslation } from '@/i18n'
 import { isApiEnabled } from '@/constants'
 import { requestLoginOtp } from '@/services'
-import RequiredFieldsHint from '@/components/common/RequiredFieldsHint'
+import RequiredFieldsHint, { FORM_FINE_PRINT_CLASS } from '@/components/common/RequiredFieldsHint'
 
 const RESEND_SECONDS = 60
 
@@ -54,14 +54,9 @@ const Login = () => {
     setError('')
     setLoading(true)
     try {
-      if (isApiEnabled()) {
-        await requestLoginOtp({ email, password })
-        setStep('otp')
-        setResendIn(RESEND_SECONDS)
-        return
-      }
-      const user = await login({ email, password })
-      finishLogin(user)
+      await requestLoginOtp({ email, password })
+      setStep('otp')
+      setResendIn(RESEND_SECONDS)
     } catch (err) {
       setError(err.message || t('auth.loginFailed'))
     } finally {
@@ -209,7 +204,7 @@ const Login = () => {
         </form>
       )}
 
-      <p className={clsx('text-sm text-slate-500 text-center mt-8', isKhmer ? 'leading-normal' : 'leading-relaxed')}>
+      <p className={clsx(FORM_FINE_PRINT_CLASS, 'text-center mt-8', isKhmer && 'font-khmer')}>
         {t('auth.agreeTerms')}{' '}
         <Link to="/terms" className="text-primary-600 hover:underline">{t('auth.terms')}</Link>
         {' '}{t('auth.and')}{' '}

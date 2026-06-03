@@ -11,13 +11,7 @@ const plans = [
   { id: 'elite', name: 'Elite', icon: '👑', price: '$149', period: '/month', desc: 'For large-scale platforms with enterprise needs', color: 'from-amber-500 to-orange-500', features: ['Unlimited students', 'Unlimited teachers', '500 GB storage', 'Full analytics suite', 'Dedicated support', 'White-label option', 'Custom integrations', 'SLA guarantee'], current: false },
 ]
 
-const transactions = [
-  { id: 'TXN-2847', date: '2026-05-01', desc: 'Pro Plan — May 2026', amount: '$49.00', status: 'paid' },
-  { id: 'TXN-2681', date: '2026-04-01', desc: 'Pro Plan — April 2026', amount: '$49.00', status: 'paid' },
-  { id: 'TXN-2512', date: '2026-03-01', desc: 'Pro Plan — March 2026', amount: '$49.00', status: 'paid' },
-  { id: 'TXN-2344', date: '2026-02-01', desc: 'Pro Plan — February 2026', amount: '$49.00', status: 'paid' },
-  { id: 'TXN-2180', date: '2026-01-01', desc: 'Pro Plan — January 2026', amount: '$49.00', status: 'paid' },
-]
+const transactions = []
 
 const txColumns = [
   { key: 'id', label: 'Transaction ID', render: (row) => <span className="font-mono text-xs text-slate-500">{row.id}</span> },

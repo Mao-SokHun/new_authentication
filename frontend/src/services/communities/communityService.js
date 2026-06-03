@@ -1,5 +1,5 @@
 import { apiRequest, isApiEnabled } from '../core/api'
-import { allCommunities, filterCommunities } from '@/constants'
+import { filterCommunities } from '@/constants'
 
 const ENDPOINTS = {
   list: '/communities',
@@ -16,18 +16,14 @@ export async function fetchCommunities(params = {}) {
     return Array.isArray(json) ? json : (json.data ?? [])
   }
 
-  let list = allCommunities
-  if (params.type === 'major' || params.type === 'subject') {
-    list = list.filter((c) => c.type === params.type)
-  }
-  return filterCommunities(list, params.q ?? '')
+  return []
 }
 
 export async function fetchCommunityById(id) {
   if (isApiEnabled()) {
     return apiRequest(ENDPOINTS.byId(id))
   }
-  return allCommunities.find((c) => c.id === id) ?? null
+  return null
 }
 
 export async function createCommunity(data) {
@@ -37,5 +33,5 @@ export async function createCommunity(data) {
       body: JSON.stringify(data),
     })
   }
-  return { id: `mock-${Date.now()}`, ...data }
+  return null
 }

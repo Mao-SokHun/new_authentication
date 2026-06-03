@@ -5,11 +5,18 @@ import { Check, User, BookOpen, MessageSquare } from 'lucide-react'
 import Input from '../ui/Input'
 import Button from '../ui/Button'
 import SearchableSelect from '../ui/SearchableSelect'
-import RequiredFieldsHint from './RequiredFieldsHint'
+import RequiredFieldsHint, { FORM_FINE_PRINT_CLASS } from './RequiredFieldsHint'
+import PageCard from './PageCard'
 import FieldLabel from '../ui/FieldLabel'
 import clsx from 'clsx'
 import { useTranslation, localizeOptionList, useLocalizedFilterOptions } from '@/i18n'
 import { FILTER_ALL, TEACHER_GENDER_OPTIONS, getSubjectFilterOptions } from '@/constants'
+import { getPhoneDigits, isValidLocalPhone, sanitizePhoneInput } from '@/utils/phoneInput'
+import {
+  buildOnboardingTeacherProfile,
+  emptyTeacherOnboardingForm,
+  validateTeacherOnboardingStep1,
+} from '@/lib/mentorApiMap'
 
 const steps = [
   { id: 1, labelKey: 'teacherOnboarding.stepBasic', shortLabelKey: 'teacherOnboarding.stepBasicShort', icon: User },
@@ -17,24 +24,14 @@ const steps = [
   { id: 3, labelKey: 'teacherOnboarding.stepAbout', shortLabelKey: 'teacherOnboarding.stepAboutShort', icon: MessageSquare },
 ]
 
-const CompleteTeacherProfileModal = ({ open, onComplete }) => {
-  const { t, labelFor } = useTranslation()
+const CompleteTeacherProfileModal = ({ open, onComplete, required = false }) => {
+  const { t, labelFor, isKhmer } = useTranslation()
   const opts = useLocalizedFilterOptions()
   const [step, setStep] = useState(1)
+  const [step1Errors, setStep1Errors] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
-  const [form, setForm] = useState({
-    firstName: '',
-    lastName: '',
-    title: '',
-    phone: '',
-    gender: '',
-    experienceYears: '',
-    major: '',
-    subject: '',
-    province: '',
-    bio: '',
-  })
+  const [form, setForm] = useState(emptyTeacherOnboardingForm)
 
   const majorOptions = useMemo(
     () => opts.majors.filter((o) => o.value !== FILTER_ALL.major),
@@ -54,20 +51,10 @@ const CompleteTeacherProfileModal = ({ open, onComplete }) => {
   useEffect(() => {
     if (open) {
       setStep(1)
+      setStep1Errors(false)
       setSaving(false)
       setSaveError('')
-      setForm({
-        firstName: '',
-        lastName: '',
-        title: '',
-        phone: '',
-        gender: '',
-        experienceYears: '',
-        major: '',
-        subject: '',
-        province: '',
-        bio: '',
-      })
+      setForm(emptyTeacherOnboardingForm())
     }
   }, [open])
 
@@ -92,41 +79,39 @@ const CompleteTeacherProfileModal = ({ open, onComplete }) => {
     })
   }
 
-  const parsedExperienceYears = parseInt(form.experienceYears, 10)
+  const step1Check = validateTeacherOnboardingStep1(form, { locationOptions })
+  const { valid: step1Valid, experienceYearsValid, provinceFromList } = step1Check
 
   const canContinue =
-    step === 1
-      ? form.firstName.trim() &&
-        form.lastName.trim() &&
-        form.title.trim() &&
-        form.gender &&
-        !Number.isNaN(parsedExperienceYears) &&
-        parsedExperienceYears >= 1
-      : step === 2
-        ? form.major && form.subject && form.province
-        : true
+    step === 1 ? true : step === 2 ? form.major && form.subject : true
+
+  const phoneError =
+    step1Errors && !isValidLocalPhone(form.phone)
+      ? getPhoneDigits(form.phone)
+        ? t('auth.phoneInvalid')
+        : t('auth.phoneRequired')
+      : undefined
+
+  const provinceError =
+    step1Errors && !provinceFromList ? t('auth.locationRequired') : undefined
 
   const handleNext = async () => {
+    if (step === 1) {
+      setStep1Errors(true)
+      if (!step1Valid) return
+      setStep(2)
+      return
+    }
     if (step < 3) {
       setStep((s) => s + 1)
       return
     }
 
-    const firstName = form.firstName.trim()
-    const lastName = form.lastName.trim()
-    const payload = {
-      firstName,
-      lastName,
-      name: `${firstName} ${lastName}`.trim(),
-      title: form.title.trim(),
-      phone: form.phone.trim(),
-      gender: form.gender,
-      experienceYears: parsedExperienceYears,
-      major: form.major,
-      subject: form.subject,
-      province: form.province,
-      bio: form.bio.trim(),
-    }
+    const payload = buildOnboardingTeacherProfile(form, {
+      yearsExpLabel: t('teacherCard.yearsExp', {
+        count: step1Check.parsedExperienceYears,
+      }),
+    })
 
     setSaveError('')
     setSaving(true)
@@ -144,7 +129,10 @@ const CompleteTeacherProfileModal = ({ open, onComplete }) => {
       <div className="absolute inset-0 bg-slate-900/45 backdrop-blur-sm" aria-hidden />
 
       <section
-        className="relative w-full max-w-md max-h-[min(90vh,780px)] flex flex-col overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-slate-200/80"
+        className={clsx(
+          'relative w-full max-w-md max-h-[min(90vh,780px)] flex flex-col overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-slate-200/80',
+          isKhmer && 'font-khmer'
+        )}
         role="dialog"
         aria-modal="true"
         aria-labelledby="complete-teacher-profile-title"
@@ -198,74 +186,134 @@ const CompleteTeacherProfileModal = ({ open, onComplete }) => {
                     {t('teacherOnboarding.title')}
                   </h2>
                   <p className="text-slate-500 text-sm mt-1">{t('teacherOnboarding.subtitle')}</p>
+                  {required && (
+                    <p className="mt-2 text-xs font-medium text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                      {t('profileCompletion.gateNote')}
+                    </p>
+                  )}
                 </div>
                 <RequiredFieldsHint>{t('auth.requiredFieldsHint')}</RequiredFieldsHint>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-                  <Input
-                    label={t('teacherProfile.lastName')}
-                    value={form.lastName}
-                    onChange={(e) => setField('lastName', e.target.value)}
-                    placeholder={t('teacherProfile.lastName')}
-                    required
-                  />
-                  <Input
-                    label={t('teacherProfile.firstName')}
-                    value={form.firstName}
-                    onChange={(e) => setField('firstName', e.target.value)}
-                    placeholder={t('teacherProfile.firstName')}
-                    required
-                  />
-                </div>
-                <Input
-                  label={t('teacherProfile.professionalTitle')}
-                  value={form.title}
-                  onChange={(e) => setField('title', e.target.value)}
-                  placeholder={t('teacherOnboarding.titlePlaceholder')}
-                  required
-                />
-                <Input
-                  label={t('teacherOnboarding.phone')}
-                  type="tel"
-                  value={form.phone}
-                  onChange={(e) => setField('phone', e.target.value)}
-                  placeholder="+855 12 000 000"
-                  optional
-                  optionalLabel={t('auth.optional')}
-                />
-                <div>
-                  <FieldLabel label={t('teacherProfile.gender')} required />
-                  <div className="flex flex-wrap gap-4">
-                    {TEACHER_GENDER_OPTIONS.map((g) => (
-                      <label key={g} className="flex items-center gap-2 cursor-pointer">
-                        <button
-                          type="button"
-                          onClick={() => setField('gender', g)}
-                          className={clsx(
-                            'w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all',
-                            form.gender === g
-                              ? 'border-primary-400 bg-primary-500'
-                              : 'border-slate-300 bg-white'
-                          )}
-                        >
-                          {form.gender === g && (
-                            <span className="w-1.5 h-1.5 rounded-full bg-white" />
-                          )}
-                        </button>
-                        <span className="text-sm text-slate-700">{g}</span>
-                      </label>
-                    ))}
+
+                <PageCard className="space-y-4 !p-4 sm:!p-5">
+                  <h3 className="text-sm font-bold text-slate-800">
+                    {t('teacherProfile.personalInfo')}
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <Input
+                      label={t('teacherProfile.lastName')}
+                      value={form.lastName}
+                      onChange={(e) => setField('lastName', e.target.value)}
+                      placeholder={t('teacherProfile.lastName')}
+                      error={step1Errors && !form.lastName.trim() ? t('auth.lastNameRequired') : undefined}
+                      required
+                    />
+                    <Input
+                      label={t('teacherProfile.firstName')}
+                      value={form.firstName}
+                      onChange={(e) => setField('firstName', e.target.value)}
+                      placeholder={t('teacherProfile.firstName')}
+                      error={step1Errors && !form.firstName.trim() ? t('auth.firstNameRequired') : undefined}
+                      required
+                    />
                   </div>
-                </div>
-                <Input
-                  label={t('teacherOnboarding.experienceYears')}
-                  type="number"
-                  min={1}
-                  max={60}
-                  value={form.experienceYears}
-                  onChange={(e) => setField('experienceYears', e.target.value)}
-                  placeholder={t('teacherOnboarding.experienceYearsPlaceholder')}
-                  required
-                />
+                  <SearchableSelect
+                    label={t('filters.province')}
+                    value={form.province}
+                    onChange={(province) => setField('province', province)}
+                    options={locationOptions}
+                    placeholder={t('common.typeToSearch')}
+                    error={provinceError}
+                    required
+                  />
+                  <Input
+                    label={t('teacherOnboarding.phone')}
+                    type="tel"
+                    inputMode="numeric"
+                    autoComplete="tel"
+                    value={form.phone}
+                    onChange={(e) => setField('phone', sanitizePhoneInput(e.target.value))}
+                    placeholder={t('studentOnboarding.phonePlaceholder')}
+                    maxLength={10}
+                    error={phoneError}
+                    required
+                  />
+                  <Input
+                    label={t('teacherProfile.professionalTitle')}
+                    value={form.title}
+                    onChange={(e) => setField('title', e.target.value)}
+                    placeholder={t('teacherOnboarding.titlePlaceholder')}
+                    required
+                  />
+                  <div>
+                    <FieldLabel label={t('teacherProfile.gender')} required />
+                    <div className="flex flex-wrap gap-4">
+                      {TEACHER_GENDER_OPTIONS.map((g) => (
+                        <label key={g} className="flex items-center gap-2 cursor-pointer">
+                          <button
+                            type="button"
+                            onClick={() => setField('gender', g)}
+                            className={clsx(
+                              'w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all',
+                              form.gender === g
+                                ? 'border-primary-400 bg-primary-500'
+                                : 'border-slate-300 bg-white'
+                            )}
+                          >
+                            {form.gender === g && (
+                              <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                            )}
+                          </button>
+                          <span className="text-sm text-slate-700">{g}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </PageCard>
+
+                <PageCard className="space-y-4 !p-4 sm:!p-5">
+                  <h3 className="text-sm font-bold text-slate-800">
+                    {t('teacherProfile.experience')}
+                  </h3>
+                  <Input
+                    label={t('teacherOnboarding.experienceYears')}
+                    type="number"
+                    min={1}
+                    max={60}
+                    value={form.experienceYears}
+                    onChange={(e) => setField('experienceYears', e.target.value)}
+                    placeholder={t('teacherOnboarding.experienceYearsPlaceholder')}
+                    error={
+                      step1Errors && !experienceYearsValid
+                        ? t('teacherOnboarding.experienceYearsRequired')
+                        : undefined
+                    }
+                    required
+                  />
+                  <Input
+                    label={t('teacherOnboarding.workOrganization')}
+                    value={form.workOrganization}
+                    onChange={(e) => setField('workOrganization', e.target.value)}
+                    placeholder={t('teacherOnboarding.workOrganizationPlaceholder')}
+                    error={
+                      step1Errors && !form.workOrganization.trim()
+                        ? t('teacherOnboarding.workOrganizationRequired')
+                        : undefined
+                    }
+                    required
+                  />
+                  <Input
+                    label={t('teacherOnboarding.workPosition')}
+                    value={form.workPosition}
+                    onChange={(e) => setField('workPosition', e.target.value)}
+                    placeholder={t('teacherOnboarding.workPositionPlaceholder')}
+                    error={
+                      step1Errors && !form.workPosition.trim()
+                        ? t('teacherOnboarding.workPositionRequired')
+                        : undefined
+                    }
+                    required
+                  />
+                </PageCard>
               </>
             )}
 
@@ -295,15 +343,6 @@ const CompleteTeacherProfileModal = ({ open, onComplete }) => {
                   placeholder={t('teacherProfile.customOptionHint')}
                   allowCustom
                   disabled={!form.major}
-                  required
-                />
-                <SearchableSelect
-                  label={t('filters.province')}
-                  value={form.province}
-                  onChange={(province) => setField('province', province)}
-                  options={locationOptions}
-                  placeholder={t('teacherProfile.customOptionHint')}
-                  allowCustom
                   required
                 />
               </>
@@ -371,7 +410,7 @@ const CompleteTeacherProfileModal = ({ open, onComplete }) => {
             </div>
           </div>
 
-          <p className="text-center text-xs text-slate-500 mt-3 leading-relaxed">
+          <p className={clsx(FORM_FINE_PRINT_CLASS, 'text-center mt-3', isKhmer && 'font-khmer')}>
             {t('auth.agreeTerms')}{' '}
             <Link to="/terms" className="text-primary-600 hover:underline">
               {t('auth.terms')}

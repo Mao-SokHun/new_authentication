@@ -26,6 +26,7 @@ import {
   mentorRowToProfile,
   updateTeacherProfile,
 } from '@/services/mentors/teacherService'
+import { saveTeacherWeeklySchedule, getTeacherWeeklySchedule } from '@/services/mentors/teacherScheduleService'
 import { resolveTeacherProfile } from '@/lib/teacherProfile'
 
 const FILTER_LABEL = 'block text-xs font-semibold text-slate-600 mb-1'
@@ -36,20 +37,22 @@ const withCustomOption = (options, currentValue, labelFor) => {
   return [...options, { value: currentValue, label: labelFor(currentValue) }]
 }
 
-const initialPortfolios = (mock) => {
-  if (mock.portfolios?.length) return mock.portfolios
+const initialPortfolios = (defaults) => {
+  if (defaults.portfolios?.length) return defaults.portfolios
   return [{ id: 1, link: '', title: '' }]
 }
 
 const EditProfile = () => {
   const navigate = useNavigate()
   const { t, labelFor } = useTranslation()
-  const { user, logout } = useAuth()
+  const { user, logout, updateUser } = useAuth()
   const photoInputRef = useRef(null)
-  const mock = resolveTeacherProfile(user)
+  const defaults = resolveTeacherProfile(user)
   const opts = useLocalizedFilterOptions()
 
   const [profileLoading, setProfileLoading] = useState(isApiEnabled())
+  /** Fields from mentor API row (experience_years, parsed description) */
+  const [mentorSnapshot, setMentorSnapshot] = useState(null)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
@@ -59,24 +62,24 @@ const EditProfile = () => {
   const [deletingAccount, setDeletingAccount] = useState(false)
 
   const [avatarPreview, setAvatarPreview] = useState(null)
-  const [gender, setGender] = useState(mock.gender)
-  const [experience, setExperience] = useState(mock.experience)
-  const [schedule, setSchedule] = useState(mock.schedule)
-  const [portfolios, setPortfolios] = useState(() => initialPortfolios(mock))
+  const [gender, setGender] = useState(defaults.gender)
+  const [experience, setExperience] = useState(defaults.experience)
+  const [schedule, setSchedule] = useState(() => getTeacherWeeklySchedule(user))
+  const [portfolios, setPortfolios] = useState(() => initialPortfolios(defaults))
   const [form, setForm] = useState({
-    firstName: mock.firstName,
-    lastName: mock.lastName,
-    username: mock.username,
-    phone: mock.phone,
-    province: mock.province,
-    locationDistrict: mock.locationDistrict ?? '',
-    locationCommune: mock.locationCommune ?? '',
-    locationVillage: mock.locationVillage ?? '',
-    bio: mock.bio,
-    major: mock.major,
-    subject: mock.subject,
-    email: mock.email,
-    title: mock.title,
+    firstName: defaults.firstName,
+    lastName: defaults.lastName,
+    username: defaults.username,
+    phone: defaults.phone,
+    province: defaults.province,
+    locationDistrict: defaults.locationDistrict ?? '',
+    locationCommune: defaults.locationCommune ?? '',
+    locationVillage: defaults.locationVillage ?? '',
+    bio: defaults.bio,
+    major: defaults.major,
+    subject: defaults.subject,
+    email: defaults.email,
+    title: defaults.title,
   })
 
   const displayName = `${form.firstName} ${form.lastName}`.trim()
@@ -169,19 +172,25 @@ const EditProfile = () => {
       .then((mentor) => {
         if (cancelled) return
         const profile = mentorRowToProfile(mentor, user)
+        setMentorSnapshot(profile)
         setGender(profile.gender)
+        setExperience(profile.experience?.length ? profile.experience : defaults.experience)
         setForm((prev) => ({
           ...prev,
           firstName: profile.firstName,
           lastName: profile.lastName,
           phone: profile.phone,
           province: profile.province,
+          title: profile.title ?? prev.title,
+          major: profile.major ?? prev.major,
+          subject: profile.subject ?? prev.subject,
           bio: profile.bio,
         }))
+        setSchedule(getTeacherWeeklySchedule({ ...user, ...profile }))
       })
       .catch(() => {
         if (!cancelled) {
-          // No mentor row yet — keep defaults from auth/mock
+          // No mentor row yet — keep empty profile defaults
         }
       })
       .finally(() => {
@@ -202,6 +211,7 @@ const EditProfile = () => {
 
     setSaving(true)
     try {
+      const primaryExp = experience[0]
       await updateTeacherProfile(user.id, {
         firstName: form.firstName,
         lastName: form.lastName,
@@ -212,6 +222,24 @@ const EditProfile = () => {
         title: form.title,
         major: form.major,
         subject: form.subject,
+        experienceYears: mentorSnapshot?.experienceYears ?? user?.experienceYears,
+        workOrganization: primaryExp?.org ?? mentorSnapshot?.workOrganization ?? '',
+        workPosition: primaryExp?.role ?? mentorSnapshot?.workPosition ?? '',
+      })
+      await saveTeacherWeeklySchedule(schedule)
+      updateUser({
+        firstName: form.firstName,
+        lastName: form.lastName,
+        name: displayName,
+        gender,
+        phone: form.phone,
+        province: form.province,
+        bio: form.bio,
+        title: form.title,
+        major: form.major,
+        subject: form.subject,
+        experience,
+        schedule,
       })
       navigate('/teacher/my-profile')
     } catch (err) {

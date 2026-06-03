@@ -6,69 +6,13 @@ import {
   getStoredUser,
   setStoredUser,
 } from '@/lib/authStorage'
+import { requireApi } from '@/lib/requireApi'
 import { apiRequest } from '../core/api'
 import { ApiError } from '../core/apiErrors'
 import { ENDPOINTS } from '../core/endpoints'
 
-const OTP_STORE_KEY = 'rokkru_reset_otp'
-const DEMO_OTP = '123456'
-
-const MOCK_ROLE_EMAIL = {
-  student: 'student@rokkru.com',
-  teacher: 'teacher@rokkru.com',
-  admin: 'admin@rokkru.com',
-}
-
-const MOCK_BY_EMAIL = {
-  'student@rokkru.com': {
-    id: '1',
-    name: 'Alex Johnson',
-    email: 'student@rokkru.com',
-    role: 'student',
-  },
-  'teacher@rokkru.com': {
-    id: '2',
-    name: 'Dr. Phe Sophy',
-    email: 'teacher@rokkru.com',
-    role: 'teacher',
-  },
-  'admin@rokkru.com': {
-    id: '3',
-    name: 'Super Admin',
-    email: 'admin@rokkru.com',
-    role: 'admin',
-  },
-}
-
 /** @type {Array<{ user_type_id: number, user_type_name: string }> | null} */
 let userTypesCache = null
-
-const storeMockOtp = (email, otp) => {
-  sessionStorage.setItem(
-    OTP_STORE_KEY,
-    JSON.stringify({ email, otp, expires: Date.now() + 5 * 60 * 1000 })
-  )
-}
-
-const readMockOtp = (email, otp) => {
-  try {
-    const raw = sessionStorage.getItem(OTP_STORE_KEY)
-    if (!raw) return false
-    const stored = JSON.parse(raw)
-    return stored.email === email && stored.otp === otp && Date.now() <= stored.expires
-  } catch {
-    return false
-  }
-}
-
-const clearMockOtp = () => {
-  sessionStorage.removeItem(OTP_STORE_KEY)
-}
-
-function resolveMockUser({ email, role = 'student' }) {
-  const normalized = (email || MOCK_ROLE_EMAIL[role] || MOCK_ROLE_EMAIL.student).trim().toLowerCase()
-  return MOCK_BY_EMAIL[normalized] ?? { ...MOCK_BY_EMAIL[MOCK_ROLE_EMAIL[role]], email: normalized }
-}
 
 function normalizeUser(raw) {
   if (!raw || typeof raw !== 'object') return null
@@ -109,17 +53,15 @@ async function resolveUserTypeId(role = 'student') {
  * @param {{ email?: string, password?: string }} credentials
  */
 export async function requestLoginOtp(credentials = {}) {
-  if (isApiEnabled()) {
-    return apiRequest(ENDPOINTS.auth.login, {
-      method: 'POST',
-      auth: false,
-      body: JSON.stringify({
-        email: credentials.email,
-        password: credentials.password,
-      }),
-    })
-  }
-  return { message: 'OTP sent success' }
+  requireApi('Login')
+  return apiRequest(ENDPOINTS.auth.login, {
+    method: 'POST',
+    auth: false,
+    body: JSON.stringify({
+      email: credentials.email,
+      password: credentials.password,
+    }),
+  })
 }
 
 /**
@@ -127,68 +69,48 @@ export async function requestLoginOtp(credentials = {}) {
  * @param {{ email: string, otp: string }} data
  */
 export async function verifyLoginOtp({ email, otp }) {
-  if (isApiEnabled()) {
-    await apiRequest(ENDPOINTS.auth.verifyLoginOtp, {
-      method: 'POST',
-      auth: false,
-      body: JSON.stringify({ email, otp }),
-    })
-    const user = await fetchCurrentUser()
-    if (!user) throw new Error('Login succeeded but profile could not be loaded')
-    return persistSession(user)
-  }
-
-  const user = resolveMockUser({ email })
-  return persistSession(user, 'mock-token')
+  requireApi('Login')
+  await apiRequest(ENDPOINTS.auth.verifyLoginOtp, {
+    method: 'POST',
+    auth: false,
+    body: JSON.stringify({ email, otp }),
+  })
+  const user = await fetchCurrentUser()
+  if (!user) throw new Error('Login succeeded but profile could not be loaded')
+  return persistSession(user)
 }
 
-/**
- * Mock mode only — one-step login.
- * @param {{ email?: string, password?: string, role?: 'student'|'teacher'|'admin' }} credentials
- */
+/** Starts OTP login; completes via verifyLoginOtp. */
 export async function login(credentials = {}) {
-  if (isApiEnabled()) {
-    await requestLoginOtp(credentials)
-    throw new Error('OTP_REQUIRED')
-  }
-
-  const user = resolveMockUser(credentials)
-  return persistSession(user, 'mock-token')
+  requireApi('Login')
+  await requestLoginOtp(credentials)
+  throw new Error('OTP_REQUIRED')
 }
 
 /**
  * @param {{ email: string, password: string, role?: string, name?: string }} data
  */
 export async function register(data) {
-  if (isApiEnabled()) {
-    const user_type = await resolveUserTypeId(data.role || 'student')
-    await apiRequest(ENDPOINTS.auth.register, {
-      method: 'POST',
-      auth: false,
-      body: JSON.stringify({
-        email: data.email,
-        password: data.password,
-        user_type,
-      }),
-    })
+  requireApi('Registration')
+  const user_type = await resolveUserTypeId(data.role || 'student')
+  await apiRequest(ENDPOINTS.auth.register, {
+    method: 'POST',
+    auth: false,
+    body: JSON.stringify({
+      email: data.email,
+      password: data.password,
+      user_type,
+    }),
+  })
 
-    let user = null
-    try {
-      user = await fetchCurrentUser()
-    } catch {
-      user = normalizeUser({ email: data.email, role: data.role || 'student' })
-    }
-    if (!user) throw new Error('Registration succeeded but profile could not be loaded')
-    return persistSession(user)
+  let user = null
+  try {
+    user = await fetchCurrentUser()
+  } catch {
+    user = normalizeUser({ email: data.email, role: data.role || 'student' })
   }
-
-  const user = {
-    id: `mock-${Date.now()}`,
-    name: data.name || data.email?.split('@')[0] || 'User',
-    email: data.email,
-    role: data.role || 'student',
-  }
-  return persistSession(user, 'mock-token')
+  if (!user) throw new Error('Registration succeeded but profile could not be loaded')
+  return persistSession(user)
 }
 
 function mergeStoredProfile(user, stored) {
@@ -202,11 +124,19 @@ function mergeStoredProfile(user, stored) {
     'phone',
     'gender',
     'experienceYears',
+    'workOrganization',
+    'workPosition',
+    'experience',
     'major',
     'subject',
     'province',
     'bio',
     'location',
+    'learningFocus',
+    'interests',
+    'goals',
+    'schedule',
+    'profileComplete',
   ]
   const merged = { ...user }
   let hasProfile = false
@@ -226,17 +156,15 @@ function mergeStoredProfile(user, stored) {
 }
 
 export async function fetchCurrentUser() {
-  if (isApiEnabled()) {
-    const json = await apiRequest(ENDPOINTS.auth.me)
-    const stored = getStoredUser()
-    const user = mergeStoredProfile(
-      normalizeUser(json.user ?? json.data ?? json),
-      stored
-    )
-    if (user) setStoredUser(user)
-    return user
-  }
-  return getStoredUser()
+  if (!isApiEnabled()) return getStoredUser()
+  const json = await apiRequest(ENDPOINTS.auth.me)
+  const stored = getStoredUser()
+  const user = mergeStoredProfile(
+    normalizeUser(json.user ?? json.data ?? json),
+    stored
+  )
+  if (user) setStoredUser(user)
+  return user
 }
 
 export async function logout() {
@@ -288,31 +216,21 @@ export async function deleteAccountWithPassword({ userId, password }) {
 }
 
 export async function sendPasswordResetOtp(email) {
-  if (isApiEnabled()) {
-    return apiRequest(ENDPOINTS.auth.forgotPassword, {
-      method: 'POST',
-      auth: false,
-      body: JSON.stringify({ email }),
-    })
-  }
-  await new Promise((r) => setTimeout(r, 600))
-  storeMockOtp(email, DEMO_OTP)
-  return { ok: true }
+  requireApi('Password reset')
+  return apiRequest(ENDPOINTS.auth.forgotPassword, {
+    method: 'POST',
+    auth: false,
+    body: JSON.stringify({ email }),
+  })
 }
 
 export async function verifyPasswordResetOtp(email, otp) {
-  if (isApiEnabled()) {
-    return apiRequest(ENDPOINTS.auth.verifyResetOtp, {
-      method: 'POST',
-      auth: false,
-      body: JSON.stringify({ email, otp }),
-    })
-  }
-  await new Promise((r) => setTimeout(r, 400))
-  if (!readMockOtp(email, otp)) {
-    throw new Error('Invalid or expired verification code')
-  }
-  return { ok: true }
+  requireApi('Password reset')
+  return apiRequest(ENDPOINTS.auth.verifyResetOtp, {
+    method: 'POST',
+    auth: false,
+    body: JSON.stringify({ email, otp }),
+  })
 }
 
 /**
@@ -355,17 +273,10 @@ export async function changePassword({ oldPassword, newPassword }) {
 }
 
 export async function resetPasswordWithOtp({ email, otp, password }) {
-  if (isApiEnabled()) {
-    return apiRequest(ENDPOINTS.auth.setNewPassword, {
-      method: 'POST',
-      auth: false,
-      body: JSON.stringify({ email, newPassword: password }),
-    })
-  }
-  await new Promise((r) => setTimeout(r, 500))
-  if (!readMockOtp(email, otp)) {
-    throw new Error('Invalid or expired verification code')
-  }
-  clearMockOtp()
-  return { ok: true }
+  requireApi('Password reset')
+  return apiRequest(ENDPOINTS.auth.setNewPassword, {
+    method: 'POST',
+    auth: false,
+    body: JSON.stringify({ email, newPassword: password }),
+  })
 }

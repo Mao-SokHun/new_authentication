@@ -5,32 +5,15 @@ import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
 import { PageScaffold, PageCard, StatMetric, TabBar, DataTable } from '@/components'
 import clsx from 'clsx'
-import { featuredCommunities } from '@/constants'
-
 const contentStats = [
-  { label: 'Communities', value: '42', change: '+3 this week', icon: Hash, tone: 'primary' },
-  { label: 'Total Posts', value: '1,284', change: '+47 today', icon: FileText, tone: 'success' },
-  { label: 'Teacher Profiles', value: '88', change: '+2 pending', icon: BookOpen, tone: 'primary' },
-  { label: 'Media Files', value: '3,420', change: '1.2 GB used', icon: Image, tone: 'warning' },
+  { label: 'Communities', value: '—', change: '', icon: Hash, tone: 'primary' },
+  { label: 'Total Posts', value: '—', change: '', icon: FileText, tone: 'success' },
+  { label: 'Teacher Profiles', value: '—', change: '', icon: BookOpen, tone: 'primary' },
+  { label: 'Media Files', value: '—', change: '', icon: Image, tone: 'warning' },
 ]
 
-const communities = featuredCommunities.map((c, i) => ({
-  id: c.id,
-  name: c.name,
-  members: c.members,
-  posts: c.topics,
-  status: i === 4 ? 'pending' : i === 5 ? 'inactive' : 'active',
-  category: c.category,
-  icon: c.icon,
-}))
-
-const recentPosts = [
-  { id: 1, author: 'Sokha Dara', community: 'Mathematics Hub', excerpt: 'Just solved a really tricky integration problem...', time: '15 min ago', status: 'published' },
-  { id: 2, author: 'Linda Chea', community: 'English Learners', excerpt: 'Pro tip for IELTS Writing Task 2...', time: '1 hr ago', status: 'published' },
-  { id: 3, author: 'Anonymous', community: 'Physics Explorers', excerpt: 'Flagged content - possible spam link detected', time: '2 hrs ago', status: 'flagged' },
-  { id: 4, author: 'Bopha Keo', community: 'Data Science Cambodia', excerpt: "Anyone else find sklearn's RandomForest overfits?", time: '3 hrs ago', status: 'published' },
-  { id: 5, author: 'New User', community: 'Web Dev Bootcamp', excerpt: 'First post in this community! Excited to learn React...', time: '5 hrs ago', status: 'pending' },
-]
+const communities = []
+const recentPosts = []
 
 const postStatus = { published: { variant: 'success', label: 'Published' }, flagged: { variant: 'danger', label: 'Flagged' }, pending: { variant: 'warning', label: 'Pending' } }
 const communityStatus = { active: { variant: 'success' }, inactive: { variant: 'neutral' }, pending: { variant: 'warning' } }
