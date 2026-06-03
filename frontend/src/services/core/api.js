@@ -19,11 +19,11 @@ async function parseErrorBody(res) {
 }
 
 /**
- * @param {string} path — e.g. `/teachers`
+ * @param {string} path — e.g. `/v1/mentors`
  * @param {RequestInit & { auth?: boolean }} [init] — set auth:false to skip JWT header
  */
 export async function apiRequest(path, init = {}) {
-  const { auth = true, ...fetchInit } = init
+  const { auth = true, skipAuthRedirect = false, ...fetchInit } = init
   const base = getBaseUrl()
   const url = `${base}${path.startsWith('/') ? path : `/${path}`}`
 
@@ -54,7 +54,7 @@ export async function apiRequest(path, init = {}) {
     const body = await parseErrorBody(res)
     const message = body.message ?? body.error ?? res.statusText
 
-    if (res.status === 401 && onUnauthorized) {
+    if (res.status === 401 && onUnauthorized && !skipAuthRedirect) {
       onUnauthorized()
     }
 

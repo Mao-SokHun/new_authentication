@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Camera, Mail, Phone, Plus, X } from 'lucide-react'
+import { Camera, Eye, EyeOff, Mail, Phone, Plus, X } from 'lucide-react'
 import clsx from 'clsx'
 import {
   PageScaffold,
@@ -8,15 +8,24 @@ import {
   ExperienceSection,
   ScheduleSection,
   PageAmbient,
+  ChangePasswordCard,
 } from '@/components'
 import Avatar from '../../components/ui/Avatar'
 import SearchableSelect from '../../components/ui/SearchableSelect'
 import { LocationFilterField } from '@/components'
+import Modal from '@/components/ui/Modal'
 import { useTranslation, localizeOptionList, useLocalizedFilterOptions } from '@/i18n'
 import { FILTER_ALL } from '@/constants'
 import { getSubjectFilterOptions } from '@/constants'
 import { TEACHER_GENDER_OPTIONS } from '@/constants'
 import { useAuth } from '@/hooks'
+import { isApiEnabled } from '@/constants'
+import { deleteAccountWithPassword } from '@/services/auth/authService'
+import {
+  fetchMyTeacherProfile,
+  mentorRowToProfile,
+  updateTeacherProfile,
+} from '@/services/mentors/teacherService'
 import { resolveTeacherProfile } from '@/lib/teacherProfile'
 
 const FILTER_LABEL = 'block text-xs font-semibold text-slate-600 mb-1'
@@ -35,10 +44,19 @@ const initialPortfolios = (mock) => {
 const EditProfile = () => {
   const navigate = useNavigate()
   const { t, labelFor } = useTranslation()
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
   const photoInputRef = useRef(null)
   const mock = resolveTeacherProfile(user)
   const opts = useLocalizedFilterOptions()
+
+  const [profileLoading, setProfileLoading] = useState(isApiEnabled())
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState('')
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [deletePassword, setDeletePassword] = useState('')
+  const [showDeletePassword, setShowDeletePassword] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
+  const [deletingAccount, setDeletingAccount] = useState(false)
 
   const [avatarPreview, setAvatarPreview] = useState(null)
   const [gender, setGender] = useState(mock.gender)
@@ -138,6 +156,118 @@ const EditProfile = () => {
     [avatarPreview]
   )
 
+  useEffect(() => {
+    if (!isApiEnabled() || !user?.id) {
+      setProfileLoading(false)
+      return
+    }
+
+    let cancelled = false
+    setProfileLoading(true)
+
+    fetchMyTeacherProfile()
+      .then((mentor) => {
+        if (cancelled) return
+        const profile = mentorRowToProfile(mentor, user)
+        setGender(profile.gender)
+        setForm((prev) => ({
+          ...prev,
+          firstName: profile.firstName,
+          lastName: profile.lastName,
+          phone: profile.phone,
+          province: profile.province,
+          bio: profile.bio,
+        }))
+      })
+      .catch(() => {
+        if (!cancelled) {
+          // No mentor row yet — keep defaults from auth/mock
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setProfileLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [user?.id])
+
+  const handleSave = async () => {
+    setSaveError('')
+    if (!isApiEnabled() || !user?.id) {
+      navigate('/teacher/my-profile')
+      return
+    }
+
+    setSaving(true)
+    try {
+      await updateTeacherProfile(user.id, {
+        firstName: form.firstName,
+        lastName: form.lastName,
+        gender,
+        phone: form.phone,
+        province: form.province,
+        bio: form.bio,
+        title: form.title,
+        major: form.major,
+        subject: form.subject,
+      })
+      navigate('/teacher/my-profile')
+    } catch (err) {
+      setSaveError(err.message || t('teacherOnboarding.saveFailed'))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const openDeleteModal = () => {
+    setDeleteModalOpen(true)
+    setDeletePassword('')
+    setShowDeletePassword(false)
+    setDeleteError('')
+  }
+
+  const closeDeleteModal = () => {
+    if (deletingAccount) return
+    setDeleteModalOpen(false)
+    setDeletePassword('')
+    setShowDeletePassword(false)
+    setDeleteError('')
+  }
+
+  const handleDeleteAccount = async () => {
+    setDeleteError('')
+    if (!deletePassword.trim()) {
+      setDeleteError(t('teacherProfile.deletePasswordRequired'))
+      return
+    }
+
+    setDeletingAccount(true)
+    try {
+      await deleteAccountWithPassword({
+        userId: user?.id,
+        password: deletePassword,
+      })
+      await logout()
+      navigate('/login', { replace: true })
+    } catch (err) {
+      if (err?.message === 'DELETE_ACCOUNT_ENDPOINT_UNAVAILABLE') {
+        setDeleteError(t('teacherProfile.deleteAccountEndpointUnavailable'))
+      } else if (err?.message === 'DELETE_ACCOUNT_PASSWORD_INCORRECT') {
+        setDeleteError(t('teacherProfile.deletePasswordIncorrect'))
+      } else if (err?.message === 'DELETE_ACCOUNT_USER_NOT_FOUND') {
+        setDeleteError(t('teacherProfile.deleteAccountUserNotFound'))
+      } else if (err?.message === 'DELETE_ACCOUNT_PASSWORD_REQUIRED') {
+        setDeleteError(t('teacherProfile.deletePasswordRequired'))
+      } else {
+        setDeleteError(t('teacherProfile.deleteAccountFailed'))
+      }
+    } finally {
+      setDeletingAccount(false)
+    }
+  }
+
   const saveActions = (
     <div className="flex flex-wrap gap-2">
       <button
@@ -149,10 +279,11 @@ const EditProfile = () => {
       </button>
       <button
         type="button"
-        onClick={() => navigate('/teacher/my-profile')}
-        className="px-5 py-2 text-sm font-semibold bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition-colors shadow-sm"
+        onClick={handleSave}
+        disabled={saving || profileLoading}
+        className="px-5 py-2 text-sm font-semibold bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition-colors shadow-sm disabled:opacity-60"
       >
-        {t('profile.saveChanges')}
+        {saving ? t('teacherOnboarding.saving') : t('profile.saveChanges')}
       </button>
     </div>
   )
@@ -165,6 +296,14 @@ const EditProfile = () => {
         action={saveActions}
       >
         <div className="max-w-6xl mx-auto w-full space-y-5">
+          {saveError && (
+            <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-3">
+              {saveError}
+            </p>
+          )}
+          {profileLoading && (
+            <p className="text-sm text-slate-500">{t('filters.loadingTeachers')}</p>
+          )}
           {/* Row 1 — balanced two columns */}
           <div className="grid lg:grid-cols-2 gap-5 items-start">
             <div className="space-y-4">
@@ -265,12 +404,12 @@ const EditProfile = () => {
               <h3 className="font-bold text-slate-800 text-sm">{t('teacherProfile.personalInfo')}</h3>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <label className={labelClass}>{t('teacherProfile.firstName')}</label>
-                  <input value={form.firstName} onChange={set('firstName')} className={inputClass} />
-                </div>
-                <div>
                   <label className={labelClass}>{t('teacherProfile.lastName')}</label>
                   <input value={form.lastName} onChange={set('lastName')} className={inputClass} />
+                </div>
+                <div>
+                  <label className={labelClass}>{t('teacherProfile.firstName')}</label>
+                  <input value={form.firstName} onChange={set('firstName')} className={inputClass} />
                 </div>
               </div>
               <div>
@@ -390,8 +529,86 @@ const EditProfile = () => {
               onChange={setSchedule}
             />
           </div>
+
+          <ChangePasswordCard />
+
+          <PageCard className="border border-red-100 bg-red-50/40 space-y-3">
+            <h3 className="font-bold text-red-800">{t('teacherProfile.dangerZone')}</h3>
+            <p className="text-sm text-red-700">{t('teacherProfile.deleteAccountHint')}</p>
+            <div>
+              <button
+                type="button"
+                onClick={openDeleteModal}
+                className="px-4 py-2 rounded-xl border border-red-200 bg-white text-red-700 text-sm font-semibold hover:bg-red-50 transition-colors"
+              >
+                {t('teacherProfile.deleteAccount')}
+              </button>
+            </div>
+          </PageCard>
         </div>
       </PageScaffold>
+      <Modal
+        open={deleteModalOpen}
+        onClose={closeDeleteModal}
+        title={<span className="text-red-800 font-extrabold">{t('teacherProfile.deleteAccount')}</span>}
+        description={
+          <span className="text-slate-800 text-sm font-semibold">
+            {t('teacherProfile.deleteAccountConfirm')}
+          </span>
+        }
+        className="border border-slate-200"
+        footer={
+          <>
+            <button
+              type="button"
+              onClick={closeDeleteModal}
+              disabled={deletingAccount}
+              className="px-4 py-2 text-sm font-medium text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors disabled:opacity-60"
+            >
+              {t('profile.cancel')}
+            </button>
+            <button
+              type="button"
+              onClick={handleDeleteAccount}
+              disabled={deletingAccount}
+              className="px-4 py-2 text-sm font-semibold bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors disabled:opacity-60"
+            >
+              {deletingAccount
+                ? t('teacherProfile.deletingAccount')
+                : t('teacherProfile.confirmDeleteAccount')}
+            </button>
+          </>
+        }
+      >
+        <div className="mb-3 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-xs text-red-700">
+          {t('teacherProfile.deleteAccountHint')}
+        </div>
+        <label className="block text-sm font-semibold text-slate-700 mb-2">
+          {t('teacherProfile.confirmPassword')}
+        </label>
+        <div className="relative">
+          <input
+            type={showDeletePassword ? 'text' : 'password'}
+            value={deletePassword}
+            onChange={(e) => setDeletePassword(e.target.value)}
+            placeholder={t('teacherProfile.confirmPasswordPlaceholder')}
+            className="w-full rounded-xl border border-slate-300 px-3 py-2.5 pr-10 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-red-300"
+          />
+          <button
+            type="button"
+            onClick={() => setShowDeletePassword((prev) => !prev)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+            aria-label={
+              showDeletePassword
+                ? t('teacherProfile.hidePassword')
+                : t('teacherProfile.showPassword')
+            }
+          >
+            {showDeletePassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          </button>
+        </div>
+        {deleteError && <p className="mt-2 text-xs text-red-600">{deleteError}</p>}
+      </Modal>
     </PageAmbient>
   )
 }

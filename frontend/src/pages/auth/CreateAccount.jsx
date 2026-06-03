@@ -8,9 +8,10 @@ import AuthLayout from '@/components/layout/AuthLayout'
 import clsx from 'clsx'
 import { useTranslation } from '@/i18n'
 import { useAuth } from '@/hooks'
+import RequiredFieldsHint from '@/components/common/RequiredFieldsHint'
 
 const CreateAccount = () => {
-  const { t } = useTranslation()
+  const { t, isKhmer } = useTranslation()
   const { register } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const initialRole = searchParams.get('role') === 'teacher' ? 'teacher' : 'student'
@@ -69,12 +70,13 @@ const CreateAccount = () => {
     >
       <div className="text-center mb-6 lg:text-left">
         <h1 className="text-2xl font-bold text-on-glass">{t('auth.signupTitle')}</h1>
-        <p className="text-on-glass-muted text-sm mt-1">
+        <p className={clsx('text-on-glass-muted text-base mt-1.5', isKhmer ? 'leading-normal' : 'leading-relaxed')}>
           {role === 'teacher' ? t('auth.signupSubtitleTeacher') : t('auth.signupSubtitleStudent')}
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        <RequiredFieldsHint>{t('auth.requiredFieldsHint')}</RequiredFieldsHint>
         {error && (
           <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-3">{error}</p>
         )}
@@ -95,6 +97,7 @@ const CreateAccount = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          hint={t('auth.passwordRequirements')}
           rightIcon={
             <button
               type="button"
@@ -106,7 +109,7 @@ const CreateAccount = () => {
           }
         />
 
-        <label className="flex items-start gap-2.5 cursor-pointer">
+        <label className="flex items-start gap-3 cursor-pointer">
           <button
             type="button"
             onClick={() => setAgreed(!agreed)}
@@ -117,7 +120,8 @@ const CreateAccount = () => {
           >
             {agreed && <Check className="w-3 h-3 text-white" />}
           </button>
-          <span className="text-xs text-slate-500 leading-relaxed">
+          <span className={clsx('text-base text-slate-600', isKhmer ? 'leading-normal' : 'leading-relaxed')}>
+            <span className="text-red-500 font-bold mr-0.5" aria-hidden="true">*</span>
             {t('auth.agreeRokkruPrefix')}{' '}
             <Link to="/terms" className="text-primary-600 hover:underline font-medium">
               {t('auth.terms')}
@@ -129,18 +133,22 @@ const CreateAccount = () => {
           </span>
         </label>
 
-        <Button type="submit" variant="primary" size="lg" className="w-full" disabled={!agreed || loading}>
+        <Button type="submit" variant="primary" size="md" className="w-full" disabled={!agreed || loading}>
           {role === 'teacher' ? t('auth.createTeacherAccount') : t('auth.createAccount')}
         </Button>
       </form>
 
-      <div className="relative my-6">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-slate-200/80" />
-        </div>
-        <p className="relative text-center text-xs text-slate-500 uppercase tracking-wide px-2 mx-auto w-fit">
+      <div className="flex items-center gap-3 my-8">
+        <div className="flex-1 border-t border-slate-200/80" aria-hidden />
+        <p
+          className={clsx(
+            'shrink-0 text-xs text-slate-500 px-1',
+            isKhmer ? 'normal-case tracking-normal' : 'uppercase tracking-wide'
+          )}
+        >
           {t('auth.orSignUpWith')}
         </p>
+        <div className="flex-1 border-t border-slate-200/80" aria-hidden />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -158,7 +166,7 @@ const CreateAccount = () => {
         </button>
       </div>
 
-      <p className="text-xs text-slate-500 text-center mt-6 leading-relaxed">
+      <p className={clsx('text-sm text-slate-500 text-center mt-8', isKhmer ? 'leading-normal' : 'leading-relaxed')}>
         {t('auth.agreeTerms')}{' '}
         <Link to="/terms" className="text-primary-600 hover:underline">
           {t('auth.terms')}

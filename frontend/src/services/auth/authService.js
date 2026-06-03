@@ -7,6 +7,7 @@ import {
   setStoredUser,
 } from '@/lib/authStorage'
 import { apiRequest } from '../core/api'
+import { ApiError } from '../core/apiErrors'
 import { ENDPOINTS } from '../core/endpoints'
 
 const OTP_STORE_KEY = 'rokkru_reset_otp'
@@ -249,6 +250,43 @@ export async function logout() {
   clearAuthSession()
 }
 
+/**
+ * Delete current account after password confirmation.
+ * Backend expects body: { user_id, password }.
+ * @param {{ userId: string | number, password: string }} payload
+ */
+export async function deleteAccountWithPassword({ userId, password }) {
+  const user_id = String(userId ?? '').trim()
+  const cleanedPassword = String(password ?? '').trim()
+
+  if (!user_id) {
+    throw new Error('DELETE_ACCOUNT_USER_NOT_FOUND')
+  }
+  if (!cleanedPassword) {
+    throw new Error('DELETE_ACCOUNT_PASSWORD_REQUIRED')
+  }
+
+  if (!isApiEnabled()) {
+    clearAuthSession()
+    return { ok: true }
+  }
+
+  try {
+    return await apiRequest(ENDPOINTS.auth.deleteAccount, {
+      method: 'DELETE',
+      body: JSON.stringify({ user_id, password: cleanedPassword }),
+    })
+  } catch (err) {
+    if (err?.status === 404) {
+      throw new Error('DELETE_ACCOUNT_ENDPOINT_UNAVAILABLE')
+    }
+    if (err?.status === 400 || err?.status === 401) {
+      throw new Error('DELETE_ACCOUNT_PASSWORD_INCORRECT')
+    }
+    throw err
+  }
+}
+
 export async function sendPasswordResetOtp(email) {
   if (isApiEnabled()) {
     return apiRequest(ENDPOINTS.auth.forgotPassword, {
@@ -275,6 +313,45 @@ export async function verifyPasswordResetOtp(email, otp) {
     throw new Error('Invalid or expired verification code')
   }
   return { ok: true }
+}
+
+/**
+ * Logged-in password change — POST /api/auth/reset-password (cookie session).
+ * @param {{ oldPassword: string, newPassword: string }} payload
+ */
+export async function changePassword({ oldPassword, newPassword }) {
+  const current = String(oldPassword ?? '').trim()
+  const next = String(newPassword ?? '')
+
+  if (!current || !next) {
+    throw new Error('CHANGE_PASSWORD_VALIDATION')
+  }
+
+  if (!isApiEnabled()) {
+    throw new Error('CHANGE_PASSWORD_API_DISABLED')
+  }
+
+  try {
+    return await apiRequest(ENDPOINTS.auth.resetPassword, {
+      method: 'POST',
+      skipAuthRedirect: true,
+      body: JSON.stringify({
+        oldPassword: current,
+        newPassword: next,
+      }),
+    })
+  } catch (err) {
+    const status = err instanceof ApiError ? err.status : err?.status
+    const msg = String(err?.message || '').toLowerCase()
+
+    if (status === 401) {
+      throw new Error('CHANGE_PASSWORD_UNAUTHORIZED')
+    }
+    if (status === 400 && msg.includes('old password')) {
+      throw new Error('CHANGE_PASSWORD_OLD_INCORRECT')
+    }
+    throw new Error('CHANGE_PASSWORD_FAILED')
+  }
 }
 
 export async function resetPasswordWithOtp({ email, otp, password }) {

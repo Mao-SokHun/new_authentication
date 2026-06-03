@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import clsx from 'clsx'
 import { useAuth, getStoredUser } from '@/hooks'
 import { useTranslation } from '@/i18n'
 import RokkruLogo from './Logo'
@@ -14,7 +15,7 @@ const guestNavTabs = [
 
 /** Guest navbar — or compact bar when logged in on public support/legal pages */
 const PublicNavbar = () => {
-  const { t } = useTranslation()
+  const { t, isKhmer } = useTranslation()
   const { user } = useAuth()
   const activeUser = user ?? getStoredUser()
   const isAppUser = activeUser?.role === 'student' || activeUser?.role === 'teacher'
@@ -22,15 +23,9 @@ const PublicNavbar = () => {
   if (isAppUser) {
     const homeHref = activeUser.role === 'teacher' ? '/teacher/home' : '/home'
     return (
-      <header className="glass-public-nav">
+      <header className={clsx('glass-public-nav', isKhmer && 'font-khmer')}>
         <div className="max-w-7xl mx-auto h-14 px-4 sm:px-6 flex items-center gap-4">
           <RokkruLogo to={homeHref} size="sm" />
-          <Link
-            to={homeHref}
-            className="text-sm font-semibold text-primary-600 hover:text-primary-700 transition-colors"
-          >
-            {t('nav.backToApp')}
-          </Link>
           <div className="flex items-center gap-2 ml-auto">
             <LanguageSwitcher />
             <Avatar name={activeUser.name || 'User'} size="sm" />
@@ -44,7 +39,7 @@ const PublicNavbar = () => {
   }
 
   return (
-    <header className="glass-public-nav">
+    <header className={clsx('glass-public-nav', isKhmer && 'font-khmer')}>
       <div className="max-w-7xl mx-auto h-14 px-4 sm:px-6 flex items-center gap-3 sm:gap-4">
         <RokkruLogo to="/" size="sm" />
 

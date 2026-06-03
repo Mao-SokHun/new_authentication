@@ -3,8 +3,8 @@ import { fetchTeachers } from '@/services/mentors/teacherService'
 
 /**
  * Fetches teacher list from API (or mock fallback).
- * Backend team: this calls GET /teachers with query params from filters.
- * Expected response: { data: Teacher[], total: number, page?, pageSize? }
+ * Calls GET /api/v1/mentors with page, limit, q, skillId, subSkillId, minExperience.
+ * Response: { success, data: { item, total, page, limit } }
  */
 export function useTeachers(filters = {}) {
   const [teachers, setTeachers] = useState([])

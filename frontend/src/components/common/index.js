@@ -36,9 +36,15 @@ export { default as Stepper } from './Stepper'
 export { default as SegmentedTabs } from './SegmentedTabs'
 export { default as TabBar } from './TabBar'
 export { default as WelcomeBanner } from './WelcomeBanner'
+export { default as ChangePasswordCard } from './ChangePasswordCard'
 
 export { default as LegalWrapper } from './LegalWrapper'
 export { default as LegalPageRoute } from './LegalPageRoute'
+export {
+  default as LegalDocumentBody,
+  LegalDocumentPublicPage,
+  LegalDocumentInAppPage,
+} from './LegalDocumentPage'
 export { AdminOrPublicHelp, AdminOrPublicContact } from './AdminOrPublicSupport'
 
 export { default as BillingIntervalToggle } from './BillingIntervalToggle'

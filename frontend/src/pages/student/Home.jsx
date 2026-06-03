@@ -32,7 +32,6 @@ const Home = () => {
     <>
       <CompleteProfileModal
         open={showCompleteProfile}
-        onClose={() => setShowCompleteProfile(false)}
         onComplete={(profile) => {
           updateUser({
             firstName: profile.firstName,

@@ -19,7 +19,7 @@ const AuthLayout = ({
   variant = 'default',
   panelRole = 'student',
 }) => {
-  const { t } = useTranslation()
+  const { t, isKhmer } = useTranslation()
   const isAdmin = variant === 'admin'
 
   const panelClass = clsx(
@@ -64,18 +64,31 @@ const AuthLayout = ({
         </div>
 
         <div className="relative max-w-md z-10">
-          <p className="text-primary-200/90 text-sm font-semibold uppercase tracking-[0.2em] mb-3">
+          <p
+            className={clsx(
+              'text-primary-200/90 font-semibold mb-3',
+              isKhmer
+                ? 'text-base normal-case tracking-normal'
+                : 'text-sm uppercase tracking-[0.2em]'
+            )}
+          >
             {isAdmin ? t('brand.restricted') : t('brand.tagline')}
           </p>
           <h2
             key={title}
-            className="text-3xl xl:text-4xl font-bold leading-tight mb-4 text-white drop-shadow-sm transition-opacity duration-300"
+            className={clsx(
+              'font-bold text-white drop-shadow-sm transition-opacity duration-300',
+              isKhmer ? 'text-4xl xl:text-5xl leading-snug mb-3' : 'text-4xl xl:text-5xl leading-tight mb-4'
+            )}
           >
             {title}
           </h2>
           <p
             key={subtitle}
-            className="text-slate-300/95 text-base leading-relaxed transition-opacity duration-300"
+            className={clsx(
+              'text-slate-300/95 transition-opacity duration-300',
+              isKhmer ? 'text-lg leading-normal' : 'text-lg leading-relaxed'
+            )}
           >
             {subtitle}
           </p>
@@ -84,11 +97,11 @@ const AuthLayout = ({
         <p className="relative text-xs text-slate-500/90 z-10">{brand.copyright}</p>
       </div>
 
-      <div className="flex-1 flex flex-col justify-center px-6 py-10 sm:px-10 bg-gradient-to-br from-slate-100/80 via-slate-50 to-primary-50/40">
-        <div className="lg:hidden mb-8 flex justify-center">
+      <div className="flex-1 flex flex-col justify-center px-6 py-12 sm:px-10 lg:px-14 bg-gradient-to-br from-slate-100/80 via-slate-50 to-primary-50/40">
+        <div className="lg:hidden mb-10 flex justify-center">
           <Logo to="/" size="md" />
         </div>
-        <div className="w-full max-w-md mx-auto glass-auth-card">
+        <div className="w-full max-w-md mx-auto glass-auth-card px-7 py-8 sm:px-9 sm:py-10">
           {roleTabs}
           {children}
           {footer}

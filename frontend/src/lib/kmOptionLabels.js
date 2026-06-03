@@ -99,6 +99,7 @@ const kmOptionLabels = {
   German: 'ភាសាអាល់ម៉ង់',
   Mathematics: 'គណិតវិទ្យា',
   Physics: 'រូបវិទ្យា',
+  Art: 'សិល្បៈ',
   Statistics: 'ស្ថិតិ',
   Calculus: 'Calculus',
   'Phnom Penh': 'ភ្នំពេញ',

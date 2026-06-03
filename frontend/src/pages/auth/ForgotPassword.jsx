@@ -13,6 +13,7 @@ import {
   verifyPasswordResetOtp,
 } from "@/services";
 import { isApiEnabled } from "@/constants";
+import RequiredFieldsHint from "@/components/common/RequiredFieldsHint";
 
 const OTP_LENGTH = 6;
 const RESEND_SECONDS = 60;
@@ -242,12 +243,13 @@ const ForgotPassword = () => {
               <h1 className="text-2xl font-bold text-on-glass">
                 {t("auth.forgotPasswordTitle")}
               </h1>
-              <p className="text-on-glass-muted text-sm mt-1">
+              <p className="text-on-glass-muted text-base mt-1.5 leading-normal">
                 {t("auth.forgotPasswordSubtitle")}
               </p>
             </div>
 
             <form onSubmit={handleSendOtp} className="space-y-4">
+              <RequiredFieldsHint>{t("auth.requiredFieldsHint")}</RequiredFieldsHint>
               <Input
                 variant="glass"
                 label={t("auth.emailAddress")}
@@ -258,7 +260,7 @@ const ForgotPassword = () => {
                 required
                 leftIcon={<Mail className="w-4 h-4" />}
               />
-              <p className="text-xs text-slate-500 leading-relaxed">
+              <p className="text-sm text-slate-500 leading-relaxed">
                 {t("auth.forgotPasswordEmailHint")}
               </p>
               {!isApiEnabled() && (
@@ -273,7 +275,7 @@ const ForgotPassword = () => {
                 type="submit"
                 variant="primary"
                 className="w-full"
-                size="lg"
+                size="md"
                 disabled={loading}
               >
                 {loading ? t("auth.sendingOtp") : t("auth.sendOtp")}
@@ -287,15 +289,17 @@ const ForgotPassword = () => {
               <h1 className="text-2xl font-bold text-on-glass">
                 {t("auth.otpTitle")}
               </h1>
-              <p className="text-on-glass-muted text-sm mt-1">
+              <p className="text-on-glass-muted text-base mt-1.5 leading-normal">
                 {t("auth.otpSubtitle", { email })}
               </p>
             </div>
 
-            <form onSubmit={handleVerifyOtp} className="space-y-5">
+            <form onSubmit={handleVerifyOtp} className="space-y-4">
+              <RequiredFieldsHint>{t("auth.requiredFieldsHint")}</RequiredFieldsHint>
               <div className="space-y-3">
-                <p className="text-sm font-medium text-slate-700 text-center lg:text-left">
+                <p className="text-sm font-semibold text-slate-700 text-center lg:text-left">
                   {t("auth.verificationCode")}
+                  <span className="text-red-500 ml-0.5 font-bold">*</span>
                 </p>
                 <OtpBoxes value={otp} onChange={setOtp} disabled={loading} />
               </div>
@@ -325,7 +329,7 @@ const ForgotPassword = () => {
                 type="submit"
                 variant="primary"
                 className="w-full"
-                size="lg"
+                size="md"
                 disabled={loading || otp.length !== OTP_LENGTH}
               >
                 {loading ? t("auth.verifyingOtp") : t("auth.verifyOtp")}
@@ -339,12 +343,13 @@ const ForgotPassword = () => {
               <h1 className="text-2xl font-bold text-on-glass">
                 {t("auth.newPasswordTitle")}
               </h1>
-              <p className="text-on-glass-muted text-sm mt-1">
+              <p className="text-on-glass-muted text-base mt-1.5 leading-normal">
                 {t("auth.newPasswordSubtitle")}
               </p>
             </div>
 
             <form onSubmit={handleResetPassword} className="space-y-4">
+              <RequiredFieldsHint>{t("auth.requiredFieldsHint")}</RequiredFieldsHint>
               <Input
                 variant="glass"
                 label={t("auth.password")}
@@ -353,6 +358,7 @@ const ForgotPassword = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder={t("auth.passwordMinPlaceholder")}
                 required
+                hint={t("auth.passwordRequirements")}
                 rightIcon={
                   <button
                     type="button"
@@ -396,7 +402,7 @@ const ForgotPassword = () => {
                 type="submit"
                 variant="primary"
                 className="w-full"
-                size="lg"
+                size="md"
                 disabled={loading}
               >
                 {loading

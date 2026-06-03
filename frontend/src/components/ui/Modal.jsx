@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import clsx from 'clsx'
 
@@ -48,14 +49,14 @@ const Modal = ({
 
   if (!open) return null
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
       onClick={closeOnBackdrop ? onClose : undefined}
     >
       <div
         className={clsx(
-          'bg-white rounded-2xl shadow-2xl w-full border border-slate-100',
+          'modal-panel rounded-2xl w-full',
           sizes[size] || sizes.md,
           className
         )}
@@ -89,7 +90,8 @@ const Modal = ({
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 

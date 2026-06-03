@@ -34,7 +34,7 @@ const LanguageSwitcher = ({
     >
       {showIcon && (
         <span className="glass-lang-switch-icon" aria-hidden>
-          <Globe className="w-3.5 h-3.5" strokeWidth={2.25} />
+          <Globe className="w-3 h-3" strokeWidth={2.25} />
         </span>
       )}
 

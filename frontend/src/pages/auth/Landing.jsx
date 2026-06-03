@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { CheckCircle, ArrowRight } from 'lucide-react'
+import clsx from 'clsx'
 import Button from '../../components/ui/Button'
 import Avatar from '../../components/ui/Avatar'
 import { PublicNavbar, AppFooter, TeacherRowCard, AnimatedBackground } from '@/components'
@@ -7,7 +8,7 @@ import { useTranslation } from '@/i18n'
 import { teachers } from '@/constants'
 
 const Landing = () => {
-  const { t } = useTranslation()
+  const { t, isKhmer } = useTranslation()
   const features = t('landing.features')
   const featureList = Array.isArray(features) ? features : []
 
@@ -29,29 +30,54 @@ const Landing = () => {
           <AnimatedBackground variant="landing" intensity="normal" style="both" className="absolute inset-0" />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
-          <div className="max-w-2xl">
-            <p className="text-sm font-semibold text-primary-300 uppercase tracking-widest mb-3">
+        <div
+          className={clsx(
+            'relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8',
+            isKhmer ? 'pt-12 pb-16 sm:pt-14 lg:pt-16 lg:pb-20' : 'py-20 lg:py-28'
+          )}
+        >
+          <div className={clsx(isKhmer ? 'max-w-5xl lg:max-w-6xl' : 'max-w-2xl')}>
+            <p
+              className={clsx(
+                'landing-eyebrow font-semibold text-primary-300',
+                isKhmer
+                  ? 'text-lg sm:text-xl tracking-normal normal-case max-w-3xl mb-2 leading-snug'
+                  : 'text-base uppercase tracking-widest mb-3 leading-normal'
+              )}
+            >
               {t('landing.eyebrow')}
             </p>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
-              {t('landing.heroLine1')}{' '}
-              <span className="text-white">{t('landing.heroLine2')}</span>
-              <br />
-              <span className="text-primary-300">{t('landing.heroBrand')}</span>
+            <h1
+              className={clsx(
+                'landing-hero-title font-extrabold flex flex-col',
+                isKhmer
+                  ? 'text-3xl sm:text-4xl lg:text-5xl gap-1 mb-5'
+                  : 'text-4xl sm:text-5xl lg:text-6xl gap-2 mb-9'
+              )}
+            >
+              <span className="block landing-hero-line">{t('landing.heroLine1')}</span>
+              <span className="block landing-hero-line">
+                <span className="text-white">{t('landing.heroLine2')}</span>
+                <span className="text-primary-300 ml-1">{t('landing.heroBrand')}</span>
+              </span>
             </h1>
-            <p className="text-lg text-slate-300 mb-8 leading-relaxed max-w-xl">
+            <p
+              className={clsx(
+                'text-slate-300 mb-8',
+                isKhmer ? 'text-xl sm:text-2xl max-w-3xl leading-normal' : 'text-xl max-w-xl leading-relaxed mb-10 sm:mb-12'
+              )}
+            >
               {t('landing.heroDesc')}
             </p>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-3 sm:gap-4">
               <Link to="/create-account">
-                <Button size="lg" className="bg-gradient-to-r from-primary-300 to-primary-400 hover:from-primary-500 hover:to-primary-500 border-0 shadow-xl">
+                <Button size="lg" className="bg-gradient-to-r from-primary-300 to-primary-400 hover:from-primary-500 hover:to-primary-500 border-0 shadow-xl text-lg px-7">
                   {t('landing.ctaLearn')}
                   <ArrowRight className="w-5 h-5" />
                 </Button>
               </Link>
               <Link to="/create-account?role=teacher">
-                <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 bg-white/5">
+                <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 bg-white/5 text-lg px-7">
                   {t('landing.ctaTeach')}
                 </Button>
               </Link>
@@ -59,10 +85,10 @@ const Landing = () => {
             <div className="flex items-center gap-3 mt-8">
               <div className="flex -space-x-2">
                 {['Alex', 'Sokha', 'Bopha', 'Dara'].map((name) => (
-                  <Avatar key={name} name={name} size="xs" className="ring-2 ring-slate-800" />
+                  <Avatar key={name} name={name} size="sm" className="ring-2 ring-slate-800" />
                 ))}
               </div>
-              <p className="text-sm text-slate-300">
+              <p className={clsx('text-slate-300', isKhmer ? 'text-lg sm:text-xl' : 'text-base')}>
                 <span className="font-semibold text-white">12,000+</span> {t('landing.studentsLearning')}
               </p>
             </div>
@@ -70,11 +96,11 @@ const Landing = () => {
         </div>
 
         <div className="relative border-t border-white/10 bg-white/5 backdrop-blur-xl">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 sm:py-8 grid grid-cols-2 md:grid-cols-4 gap-6">
             {stats.map((s) => (
               <div key={s.label} className="text-center">
-                <p className="text-2xl font-bold text-white">{s.value}</p>
-                <p className="text-sm text-slate-400">{s.label}</p>
+                <p className="text-3xl sm:text-4xl font-bold text-white">{s.value}</p>
+                <p className={clsx('text-slate-300 mt-1', isKhmer ? 'text-base sm:text-lg' : 'text-sm')}>{s.label}</p>
               </div>
             ))}
           </div>
@@ -86,8 +112,12 @@ const Landing = () => {
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-end justify-between mb-10 flex-wrap gap-4">
             <div>
-              <h2 className="text-3xl font-bold text-on-glass mb-2">{t('landing.teachersTitle')}</h2>
-              <p className="text-on-glass-muted">{t('landing.teachersSubtitle')}</p>
+              <h2 className={clsx('font-bold text-on-glass mb-2', isKhmer ? 'text-3xl sm:text-4xl' : 'text-3xl')}>
+                {t('landing.teachersTitle')}
+              </h2>
+              <p className={clsx('text-on-glass-muted', isKhmer ? 'text-lg sm:text-xl' : 'text-base')}>
+                {t('landing.teachersSubtitle')}
+              </p>
             </div>
             <Link to="/create-account">
               <Button variant="outline" size="md">
@@ -107,15 +137,19 @@ const Landing = () => {
       <section className="relative py-20 overflow-hidden bg-gradient-to-br from-primary-500 to-primary-600 text-white">
         <AnimatedBackground variant="cta" intensity="soft" style="both" className="absolute inset-0" />
         <div className="relative z-10 max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-4xl font-extrabold mb-4">{t('landing.ctaTitle')}</h2>
-          <p className="text-primary-100 text-lg mb-8">{t('landing.ctaSubtitle')}</p>
+          <h2 className={clsx('font-extrabold mb-4', isKhmer ? 'text-4xl sm:text-5xl' : 'text-4xl')}>
+            {t('landing.ctaTitle')}
+          </h2>
+          <p className={clsx('text-primary-100 mb-8', isKhmer ? 'text-xl sm:text-2xl' : 'text-lg')}>
+            {t('landing.ctaSubtitle')}
+          </p>
           <Link to="/create-account">
-            <Button size="lg" className="bg-white text-primary-600 hover:bg-primary-50 border-0 shadow-xl font-bold">
+            <Button size="lg" className="bg-white text-primary-600 hover:bg-primary-50 border-0 shadow-xl font-bold text-lg px-8">
               {t('landing.ctaButton')}
               <ArrowRight className="w-5 h-5" />
             </Button>
           </Link>
-          <div className="mt-8 flex flex-wrap justify-center gap-6 text-sm text-primary-100">
+          <div className={clsx('mt-8 flex flex-wrap justify-center gap-6 text-primary-100', isKhmer ? 'text-base sm:text-lg' : 'text-sm')}>
             {featureList.map((f) => (
               <div key={f} className="flex items-center gap-2">
                 <CheckCircle className="w-4 h-4 text-primary-200 flex-shrink-0" />

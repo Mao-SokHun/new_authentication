@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
+import clsx from 'clsx'
 import Input from '../../components/ui/Input'
 import Button from '../../components/ui/Button'
 import AuthLayout from '@/components/layout/AuthLayout'
@@ -8,11 +9,12 @@ import { useAuth } from '@/hooks'
 import { useTranslation } from '@/i18n'
 import { isApiEnabled } from '@/constants'
 import { requestLoginOtp } from '@/services'
+import RequiredFieldsHint from '@/components/common/RequiredFieldsHint'
 
 const RESEND_SECONDS = 60
 
 const Login = () => {
-  const { t } = useTranslation()
+  const { t, isKhmer } = useTranslation()
   const [searchParams] = useSearchParams()
   const [showPass, setShowPass] = useState(false)
   const [step, setStep] = useState('credentials')
@@ -114,13 +116,14 @@ const Login = () => {
     >
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-on-glass">{t('auth.login')}</h1>
-        <p className="text-on-glass-muted text-sm mt-1.5 leading-relaxed">
+        <p className={clsx('text-on-glass-muted text-base mt-1.5', isKhmer ? 'leading-normal' : 'leading-relaxed')}>
           {step === 'otp' ? t('auth.otpSubtitle', { email }) : t('auth.loginSubtitle')}
         </p>
       </div>
 
       {step === 'credentials' ? (
         <form onSubmit={handleSubmit} className="space-y-4">
+          <RequiredFieldsHint>{t('auth.requiredFieldsHint')}</RequiredFieldsHint>
           {error && (
             <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-3">{error}</p>
           )}
@@ -147,7 +150,7 @@ const Login = () => {
               </button>
             }
           />
-          <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center justify-between text-base">
             <label className="flex items-center gap-2 text-slate-600 cursor-pointer">
               <input type="checkbox" className="rounded border-slate-300 text-primary-500" />
               {t('auth.rememberMe')}
@@ -156,12 +159,13 @@ const Login = () => {
               {t('auth.forgotPassword')}
             </Link>
           </div>
-          <Button type="submit" variant="primary" className="w-full" size="lg" disabled={loading}>
+          <Button type="submit" variant="primary" className="w-full" size="md" disabled={loading}>
             {loading ? t('auth.signingIn') : t('auth.loginButton')}
           </Button>
         </form>
       ) : (
         <form onSubmit={handleOtpSubmit} className="space-y-4">
+          <RequiredFieldsHint>{t('auth.requiredFieldsHint')}</RequiredFieldsHint>
           {error && (
             <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-3">{error}</p>
           )}
@@ -188,7 +192,7 @@ const Login = () => {
               {resendIn > 0 ? t('auth.resendIn', { seconds: resendIn }) : t('auth.resendOtp')}
             </Button>
           )}
-          <Button type="submit" variant="primary" className="w-full" size="lg" disabled={loading || otp.length < 6}>
+          <Button type="submit" variant="primary" className="w-full" size="md" disabled={loading || otp.length < 6}>
             {loading ? t('auth.verifyingOtp') : t('auth.verifyOtp')}
           </Button>
           <button
@@ -205,7 +209,7 @@ const Login = () => {
         </form>
       )}
 
-      <p className="text-xs text-slate-500 text-center mt-6 leading-relaxed">
+      <p className={clsx('text-sm text-slate-500 text-center mt-8', isKhmer ? 'leading-normal' : 'leading-relaxed')}>
         {t('auth.agreeTerms')}{' '}
         <Link to="/terms" className="text-primary-600 hover:underline">{t('auth.terms')}</Link>
         {' '}{t('auth.and')}{' '}

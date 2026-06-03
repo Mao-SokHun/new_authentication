@@ -81,7 +81,7 @@ const AdminLayout = ({ children }) => {
   const [showLogout, setShowLogout] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
   const { ambientShellProps } = useAmbientPointer()
-  const { t } = useTranslation()
+  const { t, isKhmer } = useTranslation()
 
   const handleLogout = () => {
     logout()
@@ -203,7 +203,8 @@ const AdminLayout = ({ children }) => {
       <aside
         className={clsx(
           'hidden md:flex flex-shrink-0 glass-ios-sidebar z-10 flex-col h-full min-h-0 transition-all duration-300',
-          sidebarOpen ? 'w-60' : 'w-16'
+          sidebarOpen ? 'w-60' : 'w-16',
+          isKhmer && 'font-khmer'
         )}
       >
         <SidebarContent />
@@ -213,7 +214,12 @@ const AdminLayout = ({ children }) => {
       {mobileOpen && (
         <div className="md:hidden fixed inset-0 z-40 flex">
           <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-md" onClick={() => setMobileOpen(false)} />
-          <aside className="relative z-10 w-64 glass-ios-sidebar h-full overflow-y-auto scrollbar-hide shadow-2xl">
+          <aside
+            className={clsx(
+              'relative z-10 w-64 glass-ios-sidebar h-full overflow-y-auto scrollbar-hide shadow-2xl',
+              isKhmer && 'font-khmer'
+            )}
+          >
             <SidebarContent mobile />
           </aside>
         </div>
@@ -222,7 +228,12 @@ const AdminLayout = ({ children }) => {
       {/* Main content — only <main> scrolls; header stays pinned */}
       <div className="flex-1 flex flex-col min-w-0 min-h-0 h-full relative z-10">
         {/* Top bar */}
-        <header className="glass-ios-nav h-14 sm:h-16 flex flex-shrink-0 items-center justify-between px-4 sm:px-6 z-20 overflow-visible">
+        <header
+          className={clsx(
+            'glass-ios-nav h-14 sm:h-16 flex flex-shrink-0 items-center justify-between px-4 sm:px-6 z-20 overflow-visible',
+            isKhmer && 'font-khmer'
+          )}
+        >
           <div className="flex items-center gap-3">
             {/* Mobile hamburger */}
             <button

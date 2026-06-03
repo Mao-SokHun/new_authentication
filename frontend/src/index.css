@@ -38,7 +38,7 @@
     box-sizing: border-box;
   }
   html {
-    font-size: 16.5px;
+    font-size: 18px;
   }
   body {
     background-color: hsl(var(--background));
@@ -54,14 +54,84 @@
 
   html[data-lang='km'] body {
     font-family: 'Kantumruy Pro', 'Khmer OS Siemreap', system-ui, sans-serif;
-    line-height: 1.8;
-    letter-spacing: 0.01em;
+    line-height: 1.6;
+    letter-spacing: 0;
+    word-spacing: normal;
+  }
+
+  /* Khmer — navbar & sidebar: Kantumruy Pro (https://fonts.google.com/specimen/Kantumruy+Pro) */
+  html[data-lang='km'] .glass-ios-nav,
+  html[data-lang='km'] .glass-ios-sidebar,
+  html[data-lang='km'] .glass-public-nav {
+    font-family: 'Kantumruy Pro', 'Khmer OS Siemreap', system-ui, sans-serif;
+    letter-spacing: 0;
+    font-feature-settings: 'kern' 1;
+  }
+
+  html[data-lang='km'] .glass-ios-nav input,
+  html[data-lang='km'] .glass-ios-nav button,
+  html[data-lang='km'] .glass-ios-nav a,
+  html[data-lang='km'] .glass-ios-nav span,
+  html[data-lang='km'] .glass-ios-sidebar input,
+  html[data-lang='km'] .glass-ios-sidebar button,
+  html[data-lang='km'] .glass-ios-sidebar a,
+  html[data-lang='km'] .glass-ios-sidebar span,
+  html[data-lang='km'] .glass-public-nav input,
+  html[data-lang='km'] .glass-public-nav button,
+  html[data-lang='km'] .glass-public-nav a,
+  html[data-lang='km'] .glass-public-nav span,
+  html[data-lang='km'] .glass-public-nav nav {
+    font-family: inherit;
+    letter-spacing: inherit;
+  }
+
+  html[data-lang='km'] .glass-ios-nav .tracking-widest,
+  html[data-lang='km'] .glass-ios-nav [class*='tracking-widest'] {
+    letter-spacing: 0 !important;
+  }
+
+  html[data-lang='km'] {
+    font-size: 19px;
+  }
+
+  html[data-lang='km'] .text-sm {
+    font-size: 1.0625rem;
+  }
+
+  /* Khmer — tighten letter/word spacing from Tailwind tracking utilities */
+  html[data-lang='km'] [class*='tracking-widest'],
+  html[data-lang='km'] [class*='tracking-wider'],
+  html[data-lang='km'] [class*='tracking-wide'],
+  html[data-lang='km'] [class*='tracking-\[0.2em\]'] {
+    letter-spacing: 0 !important;
+  }
+
+  html[data-lang='km'] .leading-relaxed {
+    line-height: 1.55;
+  }
+
+  /* Khmer script needs extra vertical room for coeng / vowel marks in large headings */
+  .landing-hero-title {
+    line-height: 1.25;
+  }
+  html[data-lang='km'] .landing-hero-title {
+    line-height: 1.2;
+  }
+  html[data-lang='km'] .landing-hero-title .landing-hero-line {
+    line-height: 1.28;
+    padding-bottom: 0;
+  }
+
+  html[data-lang='km'] .landing-eyebrow {
+    line-height: 1.35;
+    padding-top: 0;
+    padding-bottom: 0;
   }
 
   html[data-lang='km'] .text-xs,
   html[data-lang='km'] [class*='text-\[10px\]'],
   html[data-lang='km'] [class*='text-\[11px\]'] {
-    font-size: 0.8125rem !important;
+    font-size: 0.875rem !important;
   }
   ::-webkit-scrollbar {
     width: 6px;
@@ -610,6 +680,30 @@
   .glass-panel-brand::before,
   .glass-panel-brand::after {
     display: none !important;
+  }
+
+  /* Solid modal dialog — never liquid glass (readable forms/alerts) */
+  .modal-panel {
+    background: #ffffff;
+    border: 1px solid rgb(226 232 240);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+
+  :is(.app-glass-scope, .admin-glass-scope) .modal-panel {
+    position: relative;
+    isolation: isolate;
+    overflow: visible;
+    background: #ffffff !important;
+    background-image: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-color: rgb(226 232 240) !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  }
+
+  :is(.app-glass-scope, .admin-glass-scope) .modal-panel::before {
+    display: none !important;
+    content: none !important;
   }
 
   .glass-panel-alert {
@@ -1329,7 +1423,7 @@
   }
 
   html[data-lang='km'] .label-field {
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     text-transform: none;
     letter-spacing: 0;
   }
@@ -1758,7 +1852,7 @@
 
   /* Language switcher — liquid glass segmented control */
   .glass-lang-switch {
-    @apply inline-flex items-center gap-1.5 p-1 rounded-full;
+    @apply inline-flex items-center gap-1 p-0.5 rounded-full;
     border: 1px solid rgba(255, 255, 255, 0.78);
     background: linear-gradient(
       165deg,
@@ -1774,7 +1868,7 @@
   }
 
   .glass-lang-switch--md {
-    @apply gap-2 p-1.5;
+    @apply gap-1.5 p-1;
   }
 
   .glass-lang-switch--inline {
@@ -1787,11 +1881,11 @@
   }
 
   .glass-lang-switch-icon {
-    @apply flex items-center justify-center flex-shrink-0 pl-1.5 text-primary-500/80;
+    @apply flex items-center justify-center flex-shrink-0 pl-1 text-primary-500/80;
   }
 
   .glass-lang-switch--md .glass-lang-switch-icon {
-    @apply pl-2;
+    @apply pl-1.5;
   }
 
   .glass-lang-switch--md .glass-lang-switch-icon svg {
@@ -1799,13 +1893,13 @@
   }
 
   .glass-lang-switch-track {
-    @apply relative grid flex-1;
+    @apply relative grid;
     grid-template-columns: 1fr 1fr;
-    min-width: 5.75rem;
+    min-width: 4.75rem;
   }
 
   .glass-lang-switch--md .glass-lang-switch-track {
-    min-width: 7rem;
+    min-width: 5.75rem;
   }
 
   .glass-lang-switch-thumb {
@@ -1826,7 +1920,7 @@
 
   .glass-lang-switch-btn {
     @apply relative z-[1] min-w-0 font-bold uppercase tracking-wide transition-colors duration-200;
-    padding: 0.375rem 0.75rem;
+    padding: 0.2rem 0.45rem;
     font-size: 0.8125rem;
     color: rgba(100, 116, 139, 0.95);
   }
@@ -1841,7 +1935,7 @@
 
   .glass-lang-switch--md .glass-lang-switch-btn {
     @apply text-sm;
-    padding: 0.5rem 0.875rem;
+    padding: 0.35rem 0.625rem;
   }
 
   .glass-lang-switch-btn.font-khmer {

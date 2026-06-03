@@ -1,14 +1,36 @@
 import { forwardRef } from 'react'
 import clsx from 'clsx'
+import FieldLabel from './FieldLabel'
 
-const Input = forwardRef(({ label, error, hint, leftIcon, rightIcon, className, variant = 'default', ...props }, ref) => {
+const Input = forwardRef(
+  (
+    {
+      label,
+      error,
+      hint,
+      leftIcon,
+      rightIcon,
+      className,
+      variant = 'default',
+      required,
+      optional,
+      optionalLabel,
+      id,
+      ...props
+    },
+    ref
+  ) => {
   const isGlass = variant === 'glass'
 
   return (
     <div className="w-full">
-      {label && (
-        <label className="block text-sm font-medium text-slate-700 mb-1.5">{label}</label>
-      )}
+      <FieldLabel
+        htmlFor={id}
+        label={label}
+        required={required}
+        optional={optional}
+        optionalText={optionalLabel}
+      />
       <div className="relative">
         {leftIcon && (
           <div className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
@@ -17,8 +39,12 @@ const Input = forwardRef(({ label, error, hint, leftIcon, rightIcon, className, 
         )}
         <input
           ref={ref}
+          id={id}
+          required={required}
           className={clsx(
-            'w-full rounded-xl px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 transition-all duration-200 focus:outline-none',
+            'w-full rounded-xl px-4 transition-all duration-200 focus:outline-none',
+            isGlass ? 'py-2.5 text-base' : 'py-2.5 text-sm',
+            'text-slate-800 placeholder-slate-400',
             isGlass
               ? clsx(
                   'auth-field-input border bg-white/90',
@@ -44,11 +70,12 @@ const Input = forwardRef(({ label, error, hint, leftIcon, rightIcon, className, 
           </div>
         )}
       </div>
-      {error && <p className="mt-1.5 text-xs text-red-500">{error}</p>}
-      {hint && !error && <p className="mt-1.5 text-xs text-slate-400">{hint}</p>}
+      {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
+      {hint && !error && <p className="mt-2 text-sm text-slate-500">{hint}</p>}
     </div>
   )
-})
+}
+)
 
 Input.displayName = 'Input'
 export default Input

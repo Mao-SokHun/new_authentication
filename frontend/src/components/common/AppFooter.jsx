@@ -33,7 +33,7 @@ const AppFooter = ({ variant = 'full', className = '' }) => {
           isContained && 'px-5 sm:px-6'
         )}
       >
-        <p className="text-xs sm:text-sm text-slate-600 text-center sm:text-left leading-relaxed">
+        <p className="text-sm sm:text-base text-slate-600 text-center sm:text-left leading-relaxed">
           <span className="font-semibold text-slate-700">{t('footer.copyright')}</span>
           <span className="text-slate-500"> · {t('footer.tagline')}</span>
         </p>
@@ -45,7 +45,7 @@ const AppFooter = ({ variant = 'full', className = '' }) => {
             <Link
               key={to}
               to={to}
-              className="text-xs sm:text-sm text-slate-600 hover:text-primary-600 transition-colors font-medium whitespace-nowrap"
+              className="text-sm sm:text-base text-slate-600 hover:text-primary-600 transition-colors font-medium whitespace-nowrap"
             >
               {t(labelKey)}
             </Link>

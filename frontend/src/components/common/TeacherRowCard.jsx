@@ -31,12 +31,12 @@ const TeacherRowCard = ({ teacher, className }) => {
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-0.5">
-          <h3 className="text-sm font-semibold text-slate-800 truncate group-hover:text-primary-600 transition-colors">
+          <h3 className="text-base font-semibold text-slate-800 truncate group-hover:text-primary-600 transition-colors">
             {name}
           </h3>
-          {verified && <CheckCircle className="w-3.5 h-3.5 text-primary-500 flex-shrink-0" />}
+          {verified && <CheckCircle className="w-4 h-4 text-primary-500 flex-shrink-0" />}
         </div>
-        {title && <p className="text-xs text-slate-500 truncate">{title}</p>}
+        {title && <p className="text-sm text-slate-500 truncate">{title}</p>}
         <div className="flex flex-wrap items-center gap-2 mt-2">
           {subjects.slice(0, 3).map((s) => (
             <Badge key={s} variant="primary" size="sm">{s}</Badge>
@@ -47,7 +47,7 @@ const TeacherRowCard = ({ teacher, className }) => {
         </div>
       </div>
 
-      <div className="hidden sm:flex items-center gap-4 text-xs text-slate-500 flex-shrink-0">
+      <div className="hidden sm:flex items-center gap-4 text-sm text-slate-500 flex-shrink-0">
         {location && (
           <span className="flex items-center gap-1">
             <MapPin className="w-3.5 h-3.5" /> {location}

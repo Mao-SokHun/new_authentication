@@ -118,7 +118,6 @@ const TeacherHome = () => {
     <>
       <CompleteTeacherProfileModal
         open={showCompleteTeacherProfile}
-        onClose={() => setShowCompleteTeacherProfile(false)}
         onComplete={async (profile) => {
           updateUser({
             firstName: profile.firstName,

@@ -261,7 +261,7 @@ const MainLayout = ({ children }) => {
 
   const { user }   = useAuth()
 
-  const { t } = useTranslation()
+  const { t, isKhmer } = useTranslation()
 
   const isTeacher  = user?.role === 'teacher'
 
@@ -298,7 +298,12 @@ const MainLayout = ({ children }) => {
 
       {/* ══════════════════ FULL-WIDTH TOP NAVBAR ══════════════════ */}
 
-      <header className="glass-ios-nav z-50 h-16 flex flex-shrink-0 items-center overflow-visible">
+      <header
+        className={clsx(
+          'glass-ios-nav z-50 h-16 flex flex-shrink-0 items-center overflow-visible',
+          isKhmer && 'font-khmer'
+        )}
+      >
 
         {/* Logo — same width as sidebar */}
 
@@ -356,7 +361,7 @@ const MainLayout = ({ children }) => {
 
         <div className="flex items-center gap-2.5 sm:gap-3 px-4 sm:px-5 ml-auto overflow-visible">
 
-          <div className="hidden sm:flex items-center gap-2.5 glass-ios-pill rounded-full px-4 py-2.5 min-h-[2.5rem]">
+          <div className="hidden sm:flex items-center gap-2.5 rounded-full px-4 py-2.5 min-h-[2.5rem] bg-white border-2 border-slate-300 shadow-sm focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-200/80">
 
             <Search className="w-4 h-4 text-slate-400 flex-shrink-0" />
 
@@ -370,7 +375,7 @@ const MainLayout = ({ children }) => {
 
               placeholder={t('search.teachers')}
 
-              className="bg-transparent text-sm text-slate-700 placeholder-slate-400 outline-none w-40 lg:w-52 focus:w-56 transition-all duration-300"
+              className="bg-transparent text-base text-slate-700 placeholder-slate-400 outline-none w-40 lg:w-52 focus:w-56 transition-all duration-300"
 
             />
 
@@ -420,7 +425,12 @@ const MainLayout = ({ children }) => {
 
         {isTeacher && (
 
-          <aside className="hidden md:flex flex-col w-44 z-30 glass-ios-sidebar glass-ios-sidebar--teacher flex-shrink-0 min-h-0 overflow-hidden relative">
+          <aside
+            className={clsx(
+              'hidden md:flex flex-col w-44 z-30 glass-ios-sidebar glass-ios-sidebar--teacher flex-shrink-0 min-h-0 overflow-hidden relative',
+              isKhmer && 'font-khmer'
+            )}
+          >
 
             <div className="relative z-[2] flex flex-col flex-1 min-h-0 min-w-0">
               <Sidebar />
@@ -440,7 +450,12 @@ const MainLayout = ({ children }) => {
 
             <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-md" onClick={() => setMobileMenuOpen(false)} />
 
-            <aside className="relative w-64 glass-ios-sidebar glass-ios-sidebar--teacher flex flex-col shadow-2xl h-full overflow-hidden z-50">
+            <aside
+              className={clsx(
+                'relative w-64 glass-ios-sidebar glass-ios-sidebar--teacher flex flex-col shadow-2xl h-full overflow-hidden z-50',
+                isKhmer && 'font-khmer'
+              )}
+            >
 
               <button onClick={() => setMobileMenuOpen(false)} className="absolute top-3 right-3 z-[2] p-1.5 rounded-lg glass-ios-nav-item text-slate-400">
 

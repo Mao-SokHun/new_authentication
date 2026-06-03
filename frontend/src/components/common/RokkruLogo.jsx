@@ -5,8 +5,8 @@ import { brand } from '@/constants'
 
 const RokkruLogo = ({ to = '/', className, size = 'md', showText = true }) => {
   const sizes = {
-    sm: { box: 'w-7 h-7', icon: 'w-3.5 h-3.5', text: 'text-sm' },
-    md: { box: 'w-8 h-8', icon: 'w-4 h-4', text: 'text-base' },
+    sm: { box: 'w-8 h-8', icon: 'w-4 h-4', text: 'text-base' },
+    md: { box: 'w-9 h-9', icon: 'w-4 h-4', text: 'text-lg' },
     lg: { box: 'w-10 h-10', icon: 'w-5 h-5', text: 'text-lg' },
   }
   const s = sizes[size] || sizes.md

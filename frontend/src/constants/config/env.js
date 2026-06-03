@@ -6,5 +6,8 @@ export function isApiEnabled() {
 }
 
 export function getApiBaseUrl() {
-  return (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '')
+  const configured = (import.meta.env.VITE_API_URL ?? '').trim()
+  if (configured) return configured.replace(/\/$/, '')
+  if (import.meta.env.DEV) return '/api'
+  return ''
 }

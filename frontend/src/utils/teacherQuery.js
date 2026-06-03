@@ -1,19 +1,16 @@
-import { FILTER_ALL } from '@/constants'
-
-/** Map UI filter state → API query params (omit “all” sentinels) */
+/** Map UI filters → mentor controller query params (buildListQuery) */
 export function toTeacherQueryParams(filters = {}) {
   const params = {}
-  if (filters.major && filters.major !== FILTER_ALL.major) params.major = filters.major
-  if (filters.subject && filters.subject !== FILTER_ALL.subject) params.subject = filters.subject
-  if (filters.location && filters.location !== FILTER_ALL.location) params.location = filters.location
-  if (filters.locationDistrict?.trim()) params.district = filters.locationDistrict.trim()
-  if (filters.locationCommune?.trim()) params.commune = filters.locationCommune.trim()
-  if (filters.locationVillage?.trim()) params.village = filters.locationVillage.trim()
-  if (filters.sort && filters.sort !== 'Best Match') params.sort = filters.sort
-  if (filters.type && filters.type !== FILTER_ALL.type) params.type = filters.type
-  if (filters.time && filters.time !== FILTER_ALL.time) params.time = filters.time
+
+  // Backend supports: page, limit, q, skillId, subSkillId, minExperience
   if (filters.page) params.page = String(filters.page)
-  if (filters.pageSize) params.pageSize = String(filters.pageSize)
+  if (filters.pageSize) params.limit = String(filters.pageSize)
+  if (filters.q?.trim()) params.q = filters.q.trim()
+  if (filters.skillId != null) params.skillId = String(filters.skillId)
+  if (filters.subSkillId != null) params.subSkillId = String(filters.subSkillId)
+  if (filters.minExperience != null) params.minExperience = String(filters.minExperience)
+
+  // major/subject/location/sort — applied client-side after mapMentorToTeacher
   return params
 }
 
