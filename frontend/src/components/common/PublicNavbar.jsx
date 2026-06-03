@@ -16,10 +16,7 @@ const guestNavTabs = [
 const navLinkClass =
   'px-2.5 py-1.5 text-sm font-semibold text-slate-700 hover:text-primary-600 transition-colors rounded-lg hover:bg-white/50 whitespace-nowrap'
 
-const legalLinkClass =
-  'text-[10px] sm:text-[11px] font-medium text-slate-500 hover:text-primary-600 transition-colors whitespace-nowrap no-underline'
-
-/** Guest navbar — or compact bar when logged in on public support/legal pages */
+/** Landing / guest navbar — compact bar when logged in on public help/contact pages */
 const PublicNavbar = () => {
   const { t, isKhmer } = useTranslation()
   const { user } = useAuth()
@@ -32,18 +29,7 @@ const PublicNavbar = () => {
       <header className={clsx('glass-public-nav', isKhmer && 'font-khmer')}>
         <div className="max-w-7xl mx-auto h-14 px-4 sm:px-6 flex items-center gap-3">
           <RokkruLogo to={homeHref} size="sm" />
-          <div className="flex items-center gap-2 sm:gap-3 ml-auto shrink-0">
-            <nav className="hidden sm:flex items-center gap-1.5">
-              <Link to="/terms" className={legalLinkClass}>
-                {t('auth.terms')}
-              </Link>
-              <span className="text-slate-300 text-[10px]" aria-hidden>
-                ·
-              </span>
-              <Link to="/privacy" className={legalLinkClass}>
-                {t('auth.privacy')}
-              </Link>
-            </nav>
+          <div className="flex items-center gap-2 ml-auto shrink-0">
             <LanguageSwitcher size="sm" />
             <Avatar name={activeUser.name || 'User'} size="sm" />
             <span className="text-sm font-medium text-slate-600 capitalize hidden sm:inline">
@@ -69,17 +55,6 @@ const PublicNavbar = () => {
         </nav>
 
         <div className="flex items-center gap-1.5 sm:gap-2 ml-auto shrink-0">
-          <nav className="hidden md:flex items-center gap-1.5 mr-0.5">
-            <Link to="/terms" className={legalLinkClass}>
-              {t('auth.terms')}
-            </Link>
-            <span className="text-slate-300 text-[10px]" aria-hidden>
-              ·
-            </span>
-            <Link to="/privacy" className={legalLinkClass}>
-              {t('auth.privacy')}
-            </Link>
-          </nav>
           <div
             className={clsx(
               'hidden sm:flex items-center gap-2 min-w-0 rounded-full pl-3 pr-3.5 h-9 bg-white border-2 border-slate-300 shadow-sm',

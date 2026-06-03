@@ -1,11 +1,11 @@
 import { useAuth, getStoredUser } from '@/hooks'
-import AppLayout from '../layout/AppLayout'
+import MainLayout from '../layout/MainLayout'
 
 const isAppUser = (u) => u?.role === 'student' || u?.role === 'teacher'
 
 /**
- * Logged-in students/teachers see legal/support pages inside AppLayout.
- * Guests see the public standalone page (PublicNavbar).
+ * Logged-in students/teachers see legal pages inside MainLayout (student/teacher navbar).
+ * Guests see the public standalone page (landing PublicNavbar).
  */
 const LegalPageRoute = ({ inApp: InAppPage, public: PublicPage }) => {
   const { user } = useAuth()
@@ -13,9 +13,9 @@ const LegalPageRoute = ({ inApp: InAppPage, public: PublicPage }) => {
 
   if (isAppUser(activeUser)) {
     return (
-      <AppLayout>
+      <MainLayout>
         <InAppPage />
-      </AppLayout>
+      </MainLayout>
     )
   }
 

@@ -58,6 +58,8 @@ import {
   Privacy,
   Terms,
 } from './pages'
+import TermsInApp from './pages/legal/TermsInApp'
+import PrivacyInApp from './pages/legal/PrivacyInApp'
 
 const AdminOrPublicHelp = ({ AdminPage }) => {
   const { user } = useAuth()
@@ -295,9 +297,15 @@ const AppRoutes = () => (
       </ProtectedRoute>
     } />
 
-    {/* Legal & support — in-app when logged in as student/teacher */}
-    <Route path="/privacy" element={<Privacy />} />
-    <Route path="/terms" element={<Terms />} />
+    {/* Legal — guest: landing navbar; student/teacher: MainLayout navbar */}
+    <Route
+      path="/privacy"
+      element={<LegalWrapper inApp={PrivacyInApp} public={Privacy} />}
+    />
+    <Route
+      path="/terms"
+      element={<LegalWrapper inApp={TermsInApp} public={Terms} />}
+    />
     {/* Help & contact — always public pages (no login); in-app users get “Back to app” bar */}
     <Route path="/help" element={<Help />} />
     <Route path="/contact" element={<Contact />} />

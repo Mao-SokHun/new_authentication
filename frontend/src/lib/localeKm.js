@@ -19,8 +19,8 @@ export default {
     signupNav: "ចុះឈ្មោះ",
   },
   sidebar: {
-    collapse: "បង្រួមរបារច边上",
-    expand: "ពង្រីករបារច边上",
+    collapse: "បង្រួមរបារ",
+    expand: "ពង្រីករបារ",
   },
   auth: {
     login: "ចូលប្រើប្រាស់",
