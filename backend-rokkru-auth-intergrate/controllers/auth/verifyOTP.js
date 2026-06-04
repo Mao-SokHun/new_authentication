@@ -70,8 +70,7 @@ export const verifyOTP = async (req, res) => {
     is_revoked: false,
   })
 
-  // Session cookies: `token` is read by protect middleware; refreshToken for rotation.
-  res.cookie("token", accessToken, cookieOptions);
+  //   store cookie
   res.cookie("refreshToken", refreshToken, cookieOptions);
 
   res.json({
