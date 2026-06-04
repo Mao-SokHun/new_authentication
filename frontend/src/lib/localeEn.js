@@ -714,6 +714,7 @@ export default {
     lastNamePlaceholder: 'Johnson',
     interestsTitle: 'What do you want to learn?',
     interestsSubtitle: 'Select all subjects that interest you',
+    optionalStepHint: 'Optional — you can skip and update this later in your profile.',
     goalsTitle: 'What are your learning goals?',
     goalsSubtitle: 'This helps us recommend the right teachers',
     subjectsSelected: '{{count}} subject selected',

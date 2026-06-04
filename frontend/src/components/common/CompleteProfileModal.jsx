@@ -17,7 +17,6 @@ import {
   studentOnboardingFormFromUser,
   studentOnboardingSelectionsFromUser,
   validateStudentOnboardingStep1,
-  validateStudentOnboardingStep2,
 } from '@/lib/studentApiMap'
 
 const SUBJECTS = [
@@ -112,9 +111,6 @@ const CompleteProfileModal = ({ open, onComplete, required = false }) => {
   const step1Check = validateStudentOnboardingStep1(form, { locationOptions })
   const { valid: step1Valid, locationFromList } = step1Check
 
-  const canContinue =
-    step === 1 ? true : step === 2 ? validateStudentOnboardingStep2(selected).valid : true
-
   const phoneError =
     step1Errors && !isValidLocalPhone(form.phone)
       ? getPhoneDigits(form.phone)
@@ -125,6 +121,21 @@ const CompleteProfileModal = ({ open, onComplete, required = false }) => {
   const locationError =
     step1Errors && !locationFromList ? t('auth.locationRequired') : undefined
 
+  const finishOnboarding = () => {
+    const firstName = form.firstName.trim()
+    const lastName = form.lastName.trim()
+    onComplete?.({
+      firstName,
+      lastName,
+      name: `${firstName} ${lastName}`.trim(),
+      location: form.location,
+      phone: getPhoneDigits(form.phone),
+      bio: form.bio.trim(),
+      interests: selected,
+      goals: selectedGoals,
+    })
+  }
+
   const handleNext = () => {
     if (step === 1) {
       setStep1Errors(true)
@@ -132,21 +143,16 @@ const CompleteProfileModal = ({ open, onComplete, required = false }) => {
       setStep(2)
       return
     }
-    if (step < 3) setStep((s) => s + 1)
-    else {
-      const firstName = form.firstName.trim()
-      const lastName = form.lastName.trim()
-      onComplete?.({
-        firstName,
-        lastName,
-        name: `${firstName} ${lastName}`.trim(),
-        location: form.location,
-        phone: getPhoneDigits(form.phone),
-        bio: form.bio.trim(),
-        interests: selected,
-        goals: selectedGoals,
-      })
+    if (step === 2) {
+      setStep(3)
+      return
     }
+    finishOnboarding()
+  }
+
+  const handleSkip = () => {
+    if (step === 2) setStep(3)
+    else if (step === 3) finishOnboarding()
   }
 
   const subjectsSelectedLabel =
@@ -302,7 +308,6 @@ const CompleteProfileModal = ({ open, onComplete, required = false }) => {
                 <p className="text-slate-500 text-sm mt-1">
                   {t('studentOnboarding.interestsSubtitle')}
                 </p>
-                <RequiredFieldsHint className="mt-2">{t('auth.requiredFieldsHint')}</RequiredFieldsHint>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 {SUBJECTS.map((s) => (
@@ -389,12 +394,22 @@ const CompleteProfileModal = ({ open, onComplete, required = false }) => {
             )}
 
             <div className="flex items-center gap-2 ml-auto">
+              {(step === 2 || step === 3) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  type="button"
+                  onClick={handleSkip}
+                  className="text-slate-500"
+                >
+                  {t('studentOnboarding.skip')}
+                </Button>
+              )}
               <Button
                 variant="primary"
                 size="sm"
                 type="button"
                 onClick={handleNext}
-                disabled={!canContinue}
                 className="min-w-[7rem] whitespace-nowrap"
               >
                 {step === 3 ? t('studentOnboarding.finish') : t('studentOnboarding.continue')}
