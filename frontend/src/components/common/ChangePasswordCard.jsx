@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import { Eye, EyeOff, Loader2 } from 'lucide-react'
+import { CircleCheck, Eye, EyeOff, Loader2 } from 'lucide-react'
 import clsx from 'clsx'
 import PageCard from './PageCard'
 import { useTranslation } from '@/i18n'
 import { isApiEnabled } from '@/constants'
 import { changePassword } from '@/services/auth/authService'
-import { isValidPassword } from '@/utils/passwordRules'
+import { isSamePassword, isValidPassword } from '@/utils/passwordRules'
 
 const MIN_LOADING_MS = 450
 
@@ -23,6 +23,8 @@ const PasswordField = ({
   showLabel,
   hideLabel,
   disabled,
+  showValid = false,
+  validLabel,
 }) => (
   <div>
     <label htmlFor={id} className="block text-xs font-medium text-slate-500 mb-1.5">
@@ -35,19 +37,29 @@ const PasswordField = ({
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className={inputClass}
+        className={clsx(inputClass, showValid && 'pr-[4.25rem]')}
         disabled={disabled}
         autoComplete={id === 'current-password' ? 'current-password' : 'new-password'}
       />
-      <button
-        type="button"
-        onClick={onToggleShow}
-        disabled={disabled}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors disabled:opacity-40"
-        aria-label={show ? hideLabel : showLabel}
-      >
-        {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-      </button>
+      <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+        {showValid && (
+          <CircleCheck
+            className="h-3.5 w-3.5 shrink-0 text-emerald-600"
+            strokeWidth={2}
+            role="status"
+            aria-label={validLabel}
+          />
+        )}
+        <button
+          type="button"
+          onClick={onToggleShow}
+          disabled={disabled}
+          className="text-slate-400 hover:text-slate-600 transition-colors disabled:opacity-40"
+          aria-label={show ? hideLabel : showLabel}
+        >
+          {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+        </button>
+      </div>
     </div>
   </div>
 )
@@ -69,6 +81,7 @@ const ChangePasswordCard = () => {
 
   const showLabel = t('teacherProfile.showPassword')
   const hideLabel = t('teacherProfile.hidePassword')
+  const newPasswordValid = isValidPassword(newPassword)
 
   const resetFields = () => {
     setOldPassword('')
@@ -128,6 +141,10 @@ const ChangePasswordCard = () => {
     }
     if (!isValidPassword(newPassword)) {
       setErrorKey('auth.passwordRequirements')
+      return
+    }
+    if (isSamePassword(oldPassword, newPassword)) {
+      setErrorKey('auth.newPasswordSameAsOld')
       return
     }
     if (newPassword !== confirmPassword) {
@@ -222,6 +239,8 @@ const ChangePasswordCard = () => {
             showLabel={showLabel}
             hideLabel={hideLabel}
             disabled={loading}
+            showValid={newPasswordValid}
+            validLabel={t('auth.passwordValid')}
           />
           <PasswordField
             id="confirm-new-password"
@@ -235,8 +254,6 @@ const ChangePasswordCard = () => {
             hideLabel={hideLabel}
             disabled={loading}
           />
-
-          <p className="text-xs text-slate-400">{t('auth.passwordRequirements')}</p>
 
           {loading && (
             <p className="text-xs font-medium text-primary-600 flex items-center gap-1.5" role="status">

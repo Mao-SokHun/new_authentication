@@ -1,4 +1,5 @@
 import { isApiEnabled } from '@/constants'
+import { applyProfileCache, saveProfileCache } from '@/lib/profileCache'
 import {
   clearAuthSession,
   COOKIE_SESSION_TOKEN,
@@ -159,11 +160,15 @@ export async function fetchCurrentUser() {
   if (!isApiEnabled()) return getStoredUser()
   const json = await apiRequest(ENDPOINTS.auth.me)
   const stored = getStoredUser()
-  const user = mergeStoredProfile(
+  let user = mergeStoredProfile(
     normalizeUser(json.user ?? json.data ?? json),
     stored
   )
-  if (user) setStoredUser(user)
+  if (user) {
+    user = applyProfileCache(user)
+    setStoredUser(user)
+    saveProfileCache(user.id, user)
+  }
   return user
 }
 

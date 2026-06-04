@@ -55,14 +55,6 @@ export function validateMentorOnboardingStep1(form = {}, ctx = {}) {
     errors.experienceYears = MENTOR_ERROR_CODES.EXPERIENCE_YEARS_INVALID
   }
 
-  if (!isNonEmptyString(form.workOrganization)) {
-    errors.workOrganization = MENTOR_ERROR_CODES.WORK_ORGANIZATION_REQUIRED
-  }
-
-  if (!isNonEmptyString(form.workPosition)) {
-    errors.workPosition = MENTOR_ERROR_CODES.WORK_POSITION_REQUIRED
-  }
-
   return {
     ...validationResult(Object.keys(errors).length === 0, errors),
     provinceFromList,
@@ -127,13 +119,6 @@ export function validateMentorProfileComplete(user = {}) {
     years != null && years !== '' && !Number.isNaN(Number(years)) && Number(years) >= 1
   if (!hasExperience) {
     errors.experienceYears = MENTOR_ERROR_CODES.EXPERIENCE_YEARS_INVALID
-  }
-
-  if (!isNonEmptyString(user.workOrganization)) {
-    errors.workOrganization = MENTOR_ERROR_CODES.WORK_ORGANIZATION_REQUIRED
-  }
-  if (!isNonEmptyString(user.workPosition)) {
-    errors.workPosition = MENTOR_ERROR_CODES.WORK_POSITION_REQUIRED
   }
 
   if (!isNonEmptyString(user.major)) errors.major = MENTOR_ERROR_CODES.MAJOR_REQUIRED

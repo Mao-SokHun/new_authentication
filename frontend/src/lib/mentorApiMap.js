@@ -224,6 +224,25 @@ export function emptyTeacherOnboardingForm() {
   }
 }
 
+/** Pre-fill onboarding modal from session / profile cache. */
+export function teacherOnboardingFormFromUser(user = {}) {
+  const years = user.experienceYears
+  return {
+    firstName: user.firstName ?? '',
+    lastName: user.lastName ?? '',
+    title: user.title ?? '',
+    phone: user.phone ?? '',
+    gender: user.gender ?? '',
+    experienceYears: years != null && years !== '' ? String(years) : '',
+    workOrganization: user.workOrganization ?? '',
+    workPosition: user.workPosition ?? '',
+    major: user.major ?? '',
+    subject: user.subject ?? '',
+    province: user.province ?? '',
+    bio: user.bio ?? '',
+  }
+}
+
 /**
  * Step-1 onboarding form → profile object for updateUser + saveMentorFromOnboarding.
  * @param {Record<string, string>} form
@@ -233,8 +252,8 @@ export function emptyTeacherOnboardingForm() {
 export function buildOnboardingTeacherProfile(form, opts = {}) {
   const firstName = form.firstName.trim()
   const lastName = form.lastName.trim()
-  const workOrganization = form.workOrganization.trim()
-  const workPosition = form.workPosition.trim()
+  const workOrganization = String(form.workOrganization ?? '').trim()
+  const workPosition = String(form.workPosition ?? '').trim()
   const experienceYears = parseInt(form.experienceYears, 10)
 
   return {

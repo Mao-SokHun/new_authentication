@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Eye, EyeOff, Mail, ShieldCheck } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { ArrowLeft, CircleCheck, Eye, EyeOff, Mail, ShieldCheck } from "lucide-react";
 import clsx from "clsx";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
@@ -14,11 +14,11 @@ import {
 } from "@/services";
 import { isApiEnabled } from "@/constants";
 import RequiredFieldsHint from "@/components/common/RequiredFieldsHint";
+import { isSamePassword, isValidPassword } from "@/utils/passwordRules";
 
 const OTP_LENGTH = 6;
 const RESEND_SECONDS = 60;
 const STEPS = ["email", "otp", "password"];
-const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
 
 const OtpBoxes = ({ value, onChange, disabled }) => {
   const inputsRef = useRef([]);
@@ -89,7 +89,9 @@ const OtpBoxes = ({ value, onChange, disabled }) => {
 const ForgotPassword = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
+  const previousPassword = location.state?.previousPassword ?? "";
 
   const [step, setStep] = useState("email");
   const [email, setEmail] = useState("");
@@ -106,6 +108,7 @@ const ForgotPassword = () => {
 
   const stepIndex = STEPS.indexOf(step);
   const loginPath = "/login";
+  const passwordValid = isValidPassword(password);
 
   const finishLogin = (user) => {
     if (user.role === "teacher") navigate("/teacher/home", { replace: true });
@@ -180,12 +183,16 @@ const ForgotPassword = () => {
   const handleResetPassword = async (e) => {
     e.preventDefault();
     setError("");
-    if (!PASSWORD_REGEX.test(password)) {
+    if (!passwordValid) {
       setError(t("auth.passwordRequirements"));
       return;
     }
     if (password !== confirmPassword) {
       setError(t("auth.passwordMismatch"));
+      return;
+    }
+    if (previousPassword && isSamePassword(previousPassword, password)) {
+      setError(t("auth.newPasswordSameAsOld"));
       return;
     }
     setLoading(true);
@@ -358,19 +365,32 @@ const ForgotPassword = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder={t("auth.passwordMinPlaceholder")}
                 required
-                hint={t("auth.passwordRequirements")}
+                className={passwordValid ? "pr-[4.25rem]" : undefined}
                 rightIcon={
-                  <button
-                    type="button"
-                    onClick={() => setShowPass(!showPass)}
-                    className="text-slate-400 hover:text-slate-600"
-                  >
-                    {showPass ? (
-                      <EyeOff className="w-4 h-4" />
-                    ) : (
-                      <Eye className="w-4 h-4" />
+                  <div className="flex items-center gap-1.5">
+                    {passwordValid && (
+                      <CircleCheck
+                        className="h-3.5 w-3.5 shrink-0 text-emerald-600"
+                        strokeWidth={2}
+                        role="status"
+                        aria-label={t("auth.passwordValid")}
+                      />
                     )}
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowPass(!showPass)}
+                      className="text-slate-400 hover:text-slate-600"
+                      aria-label={
+                        showPass ? t("auth.hidePassword") : t("auth.showPassword")
+                      }
+                    >
+                      {showPass ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
                 }
               />
               <Input

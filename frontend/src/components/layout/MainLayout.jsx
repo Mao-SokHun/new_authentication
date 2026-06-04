@@ -44,23 +44,20 @@ const isTabActive = (pathname, href) => {
 
   if (href === '/community') return pathname === '/community' || pathname.startsWith('/community/')
 
-  if (href === '/teacher/schedule') {
-    return pathname === '/teacher/schedule' || pathname.startsWith('/teacher/create-post')
+  if (href === '/schedule') {
+    return pathname === '/schedule' || pathname.startsWith('/schedule/')
   }
 
   return pathname === href || pathname.startsWith(`${href}/`)
 
 }
 
-
-
-function buildTopNavTabs(isTeacher) {
-  return [
-    { labelKey: 'nav.home', href: isTeacher ? '/teacher/home' : '/home' },
-    { labelKey: 'nav.schedule', href: isTeacher ? '/teacher/schedule' : '/schedule' },
-    { labelKey: 'nav.community', href: '/community' },
-  ]
-}
+/** Same top tabs for student and teacher (labels: Home, Schedule, Community). */
+const topNavTabs = [
+  { labelKey: 'nav.home', href: '/home' },
+  { labelKey: 'nav.schedule', href: '/schedule' },
+  { labelKey: 'nav.community', href: '/community' },
+]
 
 
 
@@ -325,7 +322,6 @@ const MainLayout = ({ children }) => {
 
   const isTeacher  = user?.role === 'teacher'
 
-  const topNavTabs = buildTopNavTabs(isTeacher)
 
   const [mobileMenuOpen,  setMobileMenuOpen]  = useState(false)
 
@@ -445,8 +441,7 @@ const MainLayout = ({ children }) => {
 
           <div
             className={clsx(
-              'hidden sm:flex items-center gap-2.5 min-w-0 rounded-full px-4 py-2.5 min-h-[2.5rem] bg-white border-2 border-slate-300 shadow-sm',
-              'focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-200/80',
+              'nav-bar-search hidden sm:flex',
               'w-52 sm:w-60 md:w-72 lg:w-80 max-w-[min(100vw-14rem,26rem)]'
             )}
           >
@@ -457,7 +452,6 @@ const MainLayout = ({ children }) => {
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={handleSearch}
               placeholder={t('search.teachers')}
-              className="min-w-0 flex-1 w-full bg-transparent text-sm sm:text-base text-slate-700 placeholder-slate-400 outline-none"
             />
           </div>
 
@@ -475,7 +469,7 @@ const MainLayout = ({ children }) => {
 
 
 
-          <LanguageSwitcher className="hidden sm:inline-flex" />
+          <LanguageSwitcher size="nav" className="hidden sm:inline-flex" />
 
           <SettingsMenu role={isTeacher ? 'teacher' : 'student'} tone="app" />
 

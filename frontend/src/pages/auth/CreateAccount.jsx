@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { Eye, EyeOff, Check } from 'lucide-react'
+import { Eye, EyeOff, Check, CircleCheck } from 'lucide-react'
 import Input from '../../components/ui/Input'
 import Button from '../../components/ui/Button'
 import { AuthRoleTabs } from '@/components'
@@ -8,6 +8,7 @@ import AuthLayout from '@/components/layout/AuthLayout'
 import clsx from 'clsx'
 import { useTranslation } from '@/i18n'
 import { useAuth } from '@/hooks'
+import { isValidPassword } from '@/utils/passwordRules'
 import RequiredFieldsHint, { FORM_FINE_PRINT_CLASS } from '@/components/common/RequiredFieldsHint'
 
 const CreateAccount = () => {
@@ -34,9 +35,15 @@ const CreateAccount = () => {
   const heroSubtitle =
     role === 'teacher' ? t('auth.signupHeroTeacherSubtitle') : t('auth.signupHeroStudentSubtitle')
 
+  const passwordValid = isValidPassword(password)
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!agreed) return
+    if (!passwordValid) {
+      setError(t('auth.passwordRequirements'))
+      return
+    }
     setError('')
     setLoading(true)
     try {
@@ -97,15 +104,26 @@ const CreateAccount = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          hint={t('auth.passwordRequirements')}
+          className={passwordValid ? 'pr-[4.25rem]' : undefined}
           rightIcon={
-            <button
-              type="button"
-              onClick={() => setShowPass(!showPass)}
-              className="text-slate-400 hover:text-slate-600"
-            >
-              {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            </button>
+            <div className="flex items-center gap-1.5">
+              {passwordValid && (
+                <CircleCheck
+                  className="h-3.5 w-3.5 shrink-0 text-emerald-600"
+                  strokeWidth={2}
+                  role="status"
+                  aria-label={t('auth.passwordValid')}
+                />
+              )}
+              <button
+                type="button"
+                onClick={() => setShowPass(!showPass)}
+                className="text-slate-400 hover:text-slate-600"
+                aria-label={showPass ? t('auth.hidePassword') : t('auth.showPassword')}
+              >
+                {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
           }
         />
 

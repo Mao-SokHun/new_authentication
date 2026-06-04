@@ -7,14 +7,16 @@ import Button from '../ui/Button'
 import SearchableSelect from '../ui/SearchableSelect'
 import RequiredFieldsHint, { FORM_FINE_PRINT_CLASS } from './RequiredFieldsHint'
 import PageCard from './PageCard'
+import NameFieldsGrid from './NameFieldsGrid'
 import FieldLabel from '../ui/FieldLabel'
 import clsx from 'clsx'
 import { useTranslation, localizeOptionList, useLocalizedFilterOptions } from '@/i18n'
 import { FILTER_ALL, TEACHER_GENDER_OPTIONS, getSubjectFilterOptions } from '@/constants'
 import { getPhoneDigits, isValidLocalPhone, sanitizePhoneInput } from '@/utils/phoneInput'
+import { useAuth } from '@/hooks'
 import {
   buildOnboardingTeacherProfile,
-  emptyTeacherOnboardingForm,
+  teacherOnboardingFormFromUser,
   validateTeacherOnboardingStep1,
 } from '@/lib/mentorApiMap'
 
@@ -25,13 +27,14 @@ const steps = [
 ]
 
 const CompleteTeacherProfileModal = ({ open, onComplete, required = false }) => {
+  const { user } = useAuth()
   const { t, labelFor, isKhmer } = useTranslation()
   const opts = useLocalizedFilterOptions()
   const [step, setStep] = useState(1)
   const [step1Errors, setStep1Errors] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
-  const [form, setForm] = useState(emptyTeacherOnboardingForm)
+  const [form, setForm] = useState(() => teacherOnboardingFormFromUser(user))
 
   const majorOptions = useMemo(
     () => opts.majors.filter((o) => o.value !== FILTER_ALL.major),
@@ -54,9 +57,9 @@ const CompleteTeacherProfileModal = ({ open, onComplete, required = false }) => 
       setStep1Errors(false)
       setSaving(false)
       setSaveError('')
-      setForm(emptyTeacherOnboardingForm())
+      setForm(teacherOnboardingFormFromUser(user))
     }
-  }, [open])
+  }, [open, user])
 
   useEffect(() => {
     if (!open) return
@@ -198,24 +201,29 @@ const CompleteTeacherProfileModal = ({ open, onComplete, required = false }) => 
                   <h3 className="text-sm font-bold text-slate-800">
                     {t('teacherProfile.personalInfo')}
                   </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <Input
-                      label={t('teacherProfile.lastName')}
-                      value={form.lastName}
-                      onChange={(e) => setField('lastName', e.target.value)}
-                      placeholder={t('teacherProfile.lastName')}
-                      error={step1Errors && !form.lastName.trim() ? t('auth.lastNameRequired') : undefined}
-                      required
-                    />
-                    <Input
-                      label={t('teacherProfile.firstName')}
-                      value={form.firstName}
-                      onChange={(e) => setField('firstName', e.target.value)}
-                      placeholder={t('teacherProfile.firstName')}
-                      error={step1Errors && !form.firstName.trim() ? t('auth.firstNameRequired') : undefined}
-                      required
-                    />
-                  </div>
+                  <NameFieldsGrid
+                    isKhmer={isKhmer}
+                    firstNameField={
+                      <Input
+                        label={t('teacherProfile.firstName')}
+                        value={form.firstName}
+                        onChange={(e) => setField('firstName', e.target.value)}
+                        placeholder={t('teacherProfile.firstName')}
+                        error={step1Errors && !form.firstName.trim() ? t('auth.firstNameRequired') : undefined}
+                        required
+                      />
+                    }
+                    lastNameField={
+                      <Input
+                        label={t('teacherProfile.lastName')}
+                        value={form.lastName}
+                        onChange={(e) => setField('lastName', e.target.value)}
+                        placeholder={t('teacherProfile.lastName')}
+                        error={step1Errors && !form.lastName.trim() ? t('auth.lastNameRequired') : undefined}
+                        required
+                      />
+                    }
+                  />
                   <SearchableSelect
                     label={t('filters.province')}
                     value={form.province}
@@ -289,30 +297,9 @@ const CompleteTeacherProfileModal = ({ open, onComplete, required = false }) => 
                     }
                     required
                   />
-                  <Input
-                    label={t('teacherOnboarding.workOrganization')}
-                    value={form.workOrganization}
-                    onChange={(e) => setField('workOrganization', e.target.value)}
-                    placeholder={t('teacherOnboarding.workOrganizationPlaceholder')}
-                    error={
-                      step1Errors && !form.workOrganization.trim()
-                        ? t('teacherOnboarding.workOrganizationRequired')
-                        : undefined
-                    }
-                    required
-                  />
-                  <Input
-                    label={t('teacherOnboarding.workPosition')}
-                    value={form.workPosition}
-                    onChange={(e) => setField('workPosition', e.target.value)}
-                    placeholder={t('teacherOnboarding.workPositionPlaceholder')}
-                    error={
-                      step1Errors && !form.workPosition.trim()
-                        ? t('teacherOnboarding.workPositionRequired')
-                        : undefined
-                    }
-                    required
-                  />
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    {t('teacherOnboarding.experienceYearsHint')}
+                  </p>
                 </PageCard>
               </>
             )}

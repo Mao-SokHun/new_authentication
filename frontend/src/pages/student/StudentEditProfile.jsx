@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Camera, Mail, Phone, BookOpen, Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '@/hooks'
 import { PageScaffold, PageCard, PageAmbient, ChangePasswordCard } from '@/components'
+import NameFieldsGrid from '@/components/common/NameFieldsGrid'
 import Modal from '@/components/ui/Modal'
 import Avatar from '../../components/ui/Avatar'
 import Select from '../../components/ui/Select'
@@ -32,17 +33,22 @@ const subjectOptions = [
 const learningFocusAreas = ['IT', 'Language', 'Accounting', 'General Knowledge']
 const provinces = locationOptions.filter((p) => p !== FILTER_ALL.location)
 
+const fieldLabelClass = 'block text-xs font-medium text-slate-500 mb-1.5'
+const fieldInputClass =
+  'w-full text-sm text-slate-700 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary-200'
+
 const StudentEditProfile = () => {
   const navigate = useNavigate()
   const { user, logout, updateUser } = useAuth()
-  const { t, labelFor } = useTranslation()
+  const { t, labelFor, isKhmer } = useTranslation()
   const defaults = resolveStudentProfile(user)
-  const displayName = defaults.displayName || t('auth.student')
   const studentId = user?.id ? String(user.id).padStart(5, '0') : '—'
 
   const [profileLoading, setProfileLoading] = useState(isApiEnabled())
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
+  const [firstName, setFirstName] = useState(defaults.firstName ?? '')
+  const [lastName, setLastName] = useState(defaults.lastName ?? '')
   const [bio, setBio] = useState(defaults.bio)
   const [email, setEmail] = useState(defaults.email)
   const [phone, setPhone] = useState(defaults.phone)
@@ -56,6 +62,9 @@ const StudentEditProfile = () => {
   const [deleteError, setDeleteError] = useState('')
   const [deletingAccount, setDeletingAccount] = useState(false)
   const photoInputRef = useRef(null)
+
+  const displayName =
+    `${firstName} ${lastName}`.trim() || defaults.displayName || t('auth.student')
 
   const learningFocusOptions = localizeOptionList(learningFocusAreas, labelFor)
   const provinceOptions = localizeOptionList(provinces, labelFor)
@@ -73,6 +82,8 @@ const StudentEditProfile = () => {
       .then((row) => {
         if (cancelled || !row) return
         const merged = resolveStudentProfile({ ...user, ...row })
+        setFirstName(merged.firstName ?? '')
+        setLastName(merged.lastName ?? '')
         setBio(merged.bio)
         setPhone(merged.phone)
         setLearningFocus(merged.learningFocus)
@@ -112,12 +123,22 @@ const StudentEditProfile = () => {
 
   const handleSave = async () => {
     setSaveError('')
+    const trimmedFirst = firstName.trim()
+    const trimmedLast = lastName.trim()
+    if (!trimmedFirst) {
+      setSaveError(t('auth.firstNameRequired'))
+      return
+    }
+    if (!trimmedLast) {
+      setSaveError(t('auth.lastNameRequired'))
+      return
+    }
     setSaving(true)
     try {
       const patch = {
-        firstName: defaults.firstName,
-        lastName: defaults.lastName,
-        name: displayName,
+        firstName: trimmedFirst,
+        lastName: trimmedLast,
+        name: `${trimmedFirst} ${trimmedLast}`.trim(),
         email,
         phone: getPhoneDigits(phone),
         bio: bio.trim(),
@@ -287,6 +308,43 @@ const StudentEditProfile = () => {
           </div>
 
           <div className="lg:col-span-2 space-y-4">
+            <PageCard>
+              <h3 className="font-bold text-slate-800 mb-4">{t('teacherProfile.personalInfo')}</h3>
+              <NameFieldsGrid
+                isKhmer={isKhmer}
+                firstNameField={
+                  <div>
+                    <label htmlFor="student-firstName" className={fieldLabelClass}>
+                      {t('auth.firstName')}
+                    </label>
+                    <input
+                      id="student-firstName"
+                      type="text"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      className={fieldInputClass}
+                      autoComplete="given-name"
+                    />
+                  </div>
+                }
+                lastNameField={
+                  <div>
+                    <label htmlFor="student-lastName" className={fieldLabelClass}>
+                      {t('auth.lastName')}
+                    </label>
+                    <input
+                      id="student-lastName"
+                      type="text"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      className={fieldInputClass}
+                      autoComplete="family-name"
+                    />
+                  </div>
+                }
+              />
+            </PageCard>
+
             <PageCard>
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-bold text-slate-800">{t('profile.aboutMe')}</h3>

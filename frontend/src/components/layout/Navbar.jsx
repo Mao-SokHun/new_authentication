@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { Search } from 'lucide-react'
 import clsx from 'clsx'
 import { useAuth, getStoredUser } from '@/hooks'
 import { useTranslation } from '@/i18n'
@@ -27,7 +28,7 @@ const PublicNavbar = () => {
         <div className="max-w-7xl mx-auto h-14 px-4 sm:px-6 flex items-center gap-4">
           <RokkruLogo to={homeHref} size="sm" />
           <div className="flex items-center gap-2 ml-auto">
-            <LanguageSwitcher />
+            <LanguageSwitcher size="nav" />
             <Avatar name={activeUser.name || 'User'} size="sm" />
             <span className="text-xs font-medium text-slate-600 capitalize hidden sm:inline">
               {t(`auth.${activeUser.role}`)}
@@ -55,16 +56,18 @@ const PublicNavbar = () => {
           ))}
         </nav>
 
-        <div className="hidden sm:flex min-w-0 w-52 sm:w-60 md:w-72 lg:w-80 max-w-[min(100vw-12rem,26rem)] ml-auto">
-          <input
-            type="search"
-            placeholder={t('search.tutors')}
-            className="w-full min-w-0 px-4 py-2 text-sm glass-subtle rounded-full placeholder-slate-500 text-slate-800 outline-none focus:ring-2 focus:ring-primary-200/80 border border-white/60"
-          />
+        <div
+          className={clsx(
+            'nav-bar-search hidden sm:flex ml-auto',
+            'w-52 sm:w-60 md:w-72 lg:w-80 max-w-[min(100vw-12rem,26rem)]'
+          )}
+        >
+          <Search className="w-4 h-4 text-slate-400 shrink-0" aria-hidden />
+          <input type="search" placeholder={t('search.tutors')} />
         </div>
 
-        <div className="flex items-center gap-2 ml-auto md:ml-0">
-          <LanguageSwitcher />
+        <div className="flex items-center gap-2.5 sm:gap-3 ml-auto md:ml-0">
+          <LanguageSwitcher size="nav" />
           <Link to="/login">
             <Button variant="ghost" size="sm">{t('auth.login')}</Button>
           </Link>

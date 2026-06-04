@@ -15,6 +15,7 @@ import SearchableSelect from '../../components/ui/SearchableSelect'
 import { LocationFilterField } from '@/components'
 import Modal from '@/components/ui/Modal'
 import { useTranslation, localizeOptionList, useLocalizedFilterOptions } from '@/i18n'
+import NameFieldsGrid from '@/components/common/NameFieldsGrid'
 import { FILTER_ALL } from '@/constants'
 import { getSubjectFilterOptions } from '@/constants'
 import { TEACHER_GENDER_OPTIONS } from '@/constants'
@@ -44,7 +45,7 @@ const initialPortfolios = (defaults) => {
 
 const EditProfile = () => {
   const navigate = useNavigate()
-  const { t, labelFor } = useTranslation()
+  const { t, labelFor, isKhmer } = useTranslation()
   const { user, logout, updateUser } = useAuth()
   const photoInputRef = useRef(null)
   const defaults = resolveTeacherProfile(user)
@@ -63,6 +64,11 @@ const EditProfile = () => {
 
   const [avatarPreview, setAvatarPreview] = useState(null)
   const [gender, setGender] = useState(defaults.gender)
+  const [experienceYears, setExperienceYears] = useState(
+    defaults.experienceYears != null && defaults.experienceYears !== ''
+      ? String(defaults.experienceYears)
+      : ''
+  )
   const [experience, setExperience] = useState(defaults.experience)
   const [schedule, setSchedule] = useState(() => getTeacherWeeklySchedule(user))
   const [portfolios, setPortfolios] = useState(() => initialPortfolios(defaults))
@@ -174,6 +180,11 @@ const EditProfile = () => {
         const profile = mentorRowToProfile(mentor, user)
         setMentorSnapshot(profile)
         setGender(profile.gender)
+        setExperienceYears(
+          profile.experienceYears != null && profile.experienceYears !== ''
+            ? String(profile.experienceYears)
+            : ''
+        )
         setExperience(profile.experience?.length ? profile.experience : defaults.experience)
         setForm((prev) => ({
           ...prev,
@@ -212,6 +223,8 @@ const EditProfile = () => {
     setSaving(true)
     try {
       const primaryExp = experience[0]
+      const parsedYears = parseInt(experienceYears, 10)
+      const yearsPayload = Number.isNaN(parsedYears) ? undefined : parsedYears
       await updateTeacherProfile(user.id, {
         firstName: form.firstName,
         lastName: form.lastName,
@@ -222,7 +235,7 @@ const EditProfile = () => {
         title: form.title,
         major: form.major,
         subject: form.subject,
-        experienceYears: mentorSnapshot?.experienceYears ?? user?.experienceYears,
+        experienceYears: yearsPayload,
         workOrganization: primaryExp?.org ?? mentorSnapshot?.workOrganization ?? '',
         workPosition: primaryExp?.role ?? mentorSnapshot?.workPosition ?? '',
       })
@@ -238,6 +251,9 @@ const EditProfile = () => {
         title: form.title,
         major: form.major,
         subject: form.subject,
+        experienceYears: yearsPayload,
+        workOrganization: primaryExp?.org ?? '',
+        workPosition: primaryExp?.role ?? '',
         experience,
         schedule,
       })
@@ -430,16 +446,21 @@ const EditProfile = () => {
 
             <PageCard className="space-y-4 h-full">
               <h3 className="font-bold text-slate-800 text-sm">{t('teacherProfile.personalInfo')}</h3>
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div>
-                  <label className={labelClass}>{t('teacherProfile.lastName')}</label>
-                  <input value={form.lastName} onChange={set('lastName')} className={inputClass} />
-                </div>
-                <div>
-                  <label className={labelClass}>{t('teacherProfile.firstName')}</label>
-                  <input value={form.firstName} onChange={set('firstName')} className={inputClass} />
-                </div>
-              </div>
+              <NameFieldsGrid
+                isKhmer={isKhmer}
+                firstNameField={
+                  <div>
+                    <label className={labelClass}>{t('teacherProfile.firstName')}</label>
+                    <input value={form.firstName} onChange={set('firstName')} className={inputClass} />
+                  </div>
+                }
+                lastNameField={
+                  <div>
+                    <label className={labelClass}>{t('teacherProfile.lastName')}</label>
+                    <input value={form.lastName} onChange={set('lastName')} className={inputClass} />
+                  </div>
+                }
+              />
               <div>
                 <label className={labelClass}>{t('teacherProfile.professionalTitle')}</label>
                 <input value={form.title} onChange={set('title')} className={inputClass} />
@@ -546,11 +567,27 @@ const EditProfile = () => {
 
           {/* Row 3 — experience + schedule side by side */}
           <div className="grid lg:grid-cols-2 gap-5 items-start">
-            <ExperienceSection
-              title={t('teacherProfile.experience')}
-              experience={experience}
-              onChange={setExperience}
-            />
+            <div className="space-y-4">
+              <PageCard className="!p-4 sm:!p-5">
+                <label className={labelClass}>
+                  {t('teacherProfile.totalExperienceYears')}
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  max={60}
+                  value={experienceYears}
+                  onChange={(e) => setExperienceYears(e.target.value)}
+                  placeholder={t('teacherProfile.totalExperienceYearsPlaceholder')}
+                  className={inputClass}
+                />
+              </PageCard>
+              <ExperienceSection
+                title={t('teacherProfile.experience')}
+                experience={experience}
+                onChange={setExperience}
+              />
+            </div>
             <ScheduleSection
               title={t('teacherProfile.schedule')}
               schedule={schedule}

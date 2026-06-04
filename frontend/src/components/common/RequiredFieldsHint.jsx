@@ -1,6 +1,6 @@
-/** Tiny helper copy under auth forms — readable but unobtrusive */
+/** Helper copy under auth forms (required hint, password rules, terms) */
 export const FORM_FINE_PRINT_CLASS =
-  'text-[10px] sm:text-[11px] text-slate-500 leading-tight'
+  'text-xs sm:text-sm text-slate-600 leading-relaxed'
 
 /** Small note above forms: fields marked * are required */
 const RequiredFieldsHint = ({ children, className = '' }) => (

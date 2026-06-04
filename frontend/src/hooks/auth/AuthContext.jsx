@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react'
 import { clearAuthSession, getStoredUser, getToken, COOKIE_SESSION_TOKEN, setAuthSession } from '@/lib/authStorage'
+import { applyProfileCache, saveProfileCache } from '@/lib/profileCache'
 import { isApiEnabled } from '@/constants'
 import { registerUnauthorizedHandler } from '@/services'
 import * as authService from '@/services'
@@ -9,7 +10,10 @@ export { getStoredUser } from '@/lib/authStorage'
 const AuthContext = createContext(null)
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => getStoredUser())
+  const [user, setUser] = useState(() => {
+    const stored = getStoredUser()
+    return stored ? applyProfileCache(stored) : null
+  })
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -31,7 +35,7 @@ export const AuthProvider = ({ children }) => {
             }
           } catch {
             const stored = getStoredUser()
-            if (!cancelled && stored) setUser(stored)
+            if (!cancelled && stored) setUser(applyProfileCache(stored))
             else if (!cancelled) {
               clearAuthSession()
               setUser(null)
@@ -89,6 +93,7 @@ export const AuthProvider = ({ children }) => {
     setUser((prev) => {
       const next = { ...(prev ?? {}), ...patch }
       setAuthSession({ user: next })
+      if (next?.id) saveProfileCache(next.id, next)
       return next
     })
   }, [])

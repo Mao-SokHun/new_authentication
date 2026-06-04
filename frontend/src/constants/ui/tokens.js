@@ -50,3 +50,6 @@ export const teacherSidebarNav = [
   { label: 'Subscription', href: '/teacher/subscription', key: 'subscription' },
   { label: 'Create Post', action: 'createPost', key: 'createPost' },
 ]
+
+/** Landing — teachers + bottom CTA mesh/polygon animation (set true to re-enable) */
+export const LANDING_SECTION_BG_ANIMATION_ENABLED = false

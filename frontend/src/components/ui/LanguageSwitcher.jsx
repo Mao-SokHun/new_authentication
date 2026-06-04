@@ -4,7 +4,7 @@ import { useTranslation } from '@/i18n'
 
 /**
  * EN / ខ្មែរ segmented switch — iOS liquid glass style with sliding thumb.
- * @param {'sm'|'md'} size
+ * @param {'sm'|'md'|'nav'} size — nav matches navbar search height (h-9)
  * @param {boolean} showIcon — globe icon (default true)
  * @param {'pill'|'inline'} variant — pill for navbar, inline for settings panel
  */
@@ -25,7 +25,9 @@ const LanguageSwitcher = ({
     <div
       className={clsx(
         'glass-lang-switch',
+        size === 'sm' && 'glass-lang-switch--sm',
         size === 'md' && 'glass-lang-switch--md',
+        size === 'nav' && 'glass-lang-switch--nav',
         variant === 'inline' && 'glass-lang-switch--inline',
         className
       )}

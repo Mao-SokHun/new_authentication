@@ -150,7 +150,11 @@ const Login = () => {
               <input type="checkbox" className="rounded border-slate-300 text-primary-500" />
               {t('auth.rememberMe')}
             </label>
-            <Link to="/forgot-password" className="text-primary-600 font-medium hover:underline">
+            <Link
+              to="/forgot-password"
+              state={password ? { previousPassword: password } : undefined}
+              className="text-primary-600 font-medium hover:underline"
+            >
               {t('auth.forgotPassword')}
             </Link>
           </div>

@@ -252,15 +252,12 @@ const AdminLayout = ({ children }) => {
 
           <div className="flex items-center gap-2 overflow-visible">
             {/* Search */}
-            <div className="hidden md:flex items-center gap-2 glass-ios-pill rounded-xl px-3 py-2">
-              <Search className="w-4 h-4 text-slate-400" />
-              <input
-                placeholder={t('admin.searchPlaceholder')}
-                className="bg-transparent text-sm text-slate-700 placeholder-slate-400 outline-none w-36"
-              />
+            <div className="nav-bar-search hidden md:flex w-36 lg:w-44">
+              <Search className="w-4 h-4 text-slate-400 flex-shrink-0" />
+              <input placeholder={t('admin.searchPlaceholder')} />
             </div>
 
-            <LanguageSwitcher className="hidden sm:inline-flex" />
+            <LanguageSwitcher size="nav" className="hidden sm:inline-flex" />
 
             <SettingsMenu role="admin" tone="admin" onLogout={() => setShowLogout(true)} />
 

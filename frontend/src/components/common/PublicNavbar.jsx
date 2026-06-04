@@ -30,7 +30,7 @@ const PublicNavbar = () => {
         <div className="max-w-7xl mx-auto h-14 px-4 sm:px-6 flex items-center gap-3">
           <RokkruLogo to={homeHref} size="sm" />
           <div className="flex items-center gap-2 ml-auto shrink-0">
-            <LanguageSwitcher size="sm" />
+            <LanguageSwitcher size="nav" />
             <Avatar name={activeUser.name || 'User'} size="sm" />
             <span className="text-sm font-medium text-slate-600 capitalize hidden sm:inline">
               {t(`auth.${activeUser.role}`)}
@@ -54,11 +54,10 @@ const PublicNavbar = () => {
           ))}
         </nav>
 
-        <div className="flex items-center gap-1.5 sm:gap-2 ml-auto shrink-0">
+        <div className="flex items-center gap-2.5 sm:gap-3 ml-auto shrink-0">
           <div
             className={clsx(
-              'hidden sm:flex items-center gap-2 min-w-0 rounded-full pl-3 pr-3.5 h-9 bg-white border-2 border-slate-300 shadow-sm',
-              'focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-200/80',
+              'nav-bar-search hidden sm:flex',
               'w-52 sm:w-60 md:w-72 lg:w-80 max-w-[min(100vw-12rem,26rem)]'
             )}
           >
@@ -66,10 +65,9 @@ const PublicNavbar = () => {
             <input
               type="search"
               placeholder={t('search.navPlaceholder')}
-              className="min-w-0 flex-1 w-full bg-transparent text-sm text-slate-800 placeholder-slate-500 outline-none"
             />
           </div>
-          <LanguageSwitcher size="sm" />
+          <LanguageSwitcher size="nav" />
           <Link
             to="/login"
             className="text-sm font-semibold text-slate-700 hover:text-primary-600 transition-colors px-2 py-1 rounded-lg hover:bg-white/60 whitespace-nowrap no-underline"

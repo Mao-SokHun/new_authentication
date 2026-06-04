@@ -41,8 +41,6 @@ export const MENTOR_ONBOARDING_STEP1_FIELDS = [
   'title',
   'gender',
   'experienceYears',
-  'workOrganization',
-  'workPosition',
 ]
 
 export const MENTOR_ONBOARDING_STEP2_FIELDS = ['major', 'subject']

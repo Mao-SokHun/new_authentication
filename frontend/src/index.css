@@ -90,13 +90,7 @@
     letter-spacing: 0 !important;
   }
 
-  html[data-lang='km'] {
-    font-size: 19px;
-  }
-
-  html[data-lang='km'] .text-sm {
-    font-size: 1.0625rem;
-  }
+  /* Khmer uses the same rem scale as EN (18px root) — only family & spacing differ */
 
   /* Khmer — tighten letter/word spacing from Tailwind tracking utilities */
   html[data-lang='km'] [class*='tracking-widest'],
@@ -128,11 +122,6 @@
     padding-bottom: 0;
   }
 
-  html[data-lang='km'] .text-xs,
-  html[data-lang='km'] [class*='text-\[10px\]'],
-  html[data-lang='km'] [class*='text-\[11px\]'] {
-    font-size: 0.875rem !important;
-  }
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -1423,7 +1412,6 @@
   }
 
   html[data-lang='km'] .label-field {
-    font-size: 0.875rem;
     text-transform: none;
     letter-spacing: 0;
   }
@@ -1850,6 +1838,19 @@
     @apply text-slate-600;
   }
 
+  /* Navbar — search + language share one control height (36px) */
+  .nav-bar-search {
+    @apply flex items-center gap-2 min-w-0 h-9 rounded-full px-3.5 bg-white border-2 border-slate-300 shadow-sm;
+  }
+
+  .nav-bar-search:focus-within {
+    @apply border-primary-500 ring-2 ring-primary-200/80;
+  }
+
+  .nav-bar-search input {
+    @apply min-w-0 flex-1 w-full bg-transparent text-sm text-slate-700 placeholder-slate-400 outline-none;
+  }
+
   /* Language switcher — liquid glass segmented control */
   .glass-lang-switch {
     @apply inline-flex items-center gap-1 p-0.5 rounded-full;
@@ -1867,8 +1868,35 @@
       inset 0 -1px 0 rgba(255, 255, 255, 0.25);
   }
 
+  .glass-lang-switch--sm {
+    @apply gap-1 p-0.5;
+  }
+
   .glass-lang-switch--md {
     @apply gap-1.5 p-1;
+  }
+
+  .glass-lang-switch--nav {
+    @apply h-9 gap-1 px-1 shrink-0 border-2 border-slate-300 shadow-sm;
+  }
+
+  .glass-lang-switch--nav .glass-lang-switch-icon {
+    @apply pl-0.5;
+  }
+
+  .glass-lang-switch--nav .glass-lang-switch-icon svg {
+    @apply w-3.5 h-3.5;
+  }
+
+  .glass-lang-switch--nav .glass-lang-switch-track {
+    min-width: 4.5rem;
+    @apply self-center;
+  }
+
+  .glass-lang-switch--nav .glass-lang-switch-btn {
+    padding: 0.3125rem 0.5rem;
+    font-size: 0.75rem;
+    line-height: 1rem;
   }
 
   .glass-lang-switch--inline {
@@ -1940,11 +1968,6 @@
 
   .glass-lang-switch-btn.font-khmer {
     @apply normal-case tracking-normal;
-    font-size: 0.875rem;
-  }
-
-  .glass-lang-switch--md .glass-lang-switch-btn.font-khmer {
-    font-size: 0.9375rem;
   }
 
   /* Student — professional galaxy (slate / navy + muted brand rose) */

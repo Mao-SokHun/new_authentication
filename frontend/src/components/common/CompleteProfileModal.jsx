@@ -7,11 +7,18 @@ import Button from '../ui/Button'
 import SearchableSelect from '../ui/SearchableSelect'
 import RequiredFieldsHint, { FORM_FINE_PRINT_CLASS } from './RequiredFieldsHint'
 import FieldLabel from '../ui/FieldLabel'
+import NameFieldsGrid from './NameFieldsGrid'
 import clsx from 'clsx'
 import { useTranslation, useLocalizedFilterOptions } from '@/i18n'
 import { FILTER_ALL } from '@/constants'
 import { getPhoneDigits, isValidLocalPhone, sanitizePhoneInput } from '@/utils/phoneInput'
-import { validateStudentOnboardingStep1, validateStudentOnboardingStep2 } from '@/lib/studentApiMap'
+import { useAuth } from '@/hooks'
+import {
+  studentOnboardingFormFromUser,
+  studentOnboardingSelectionsFromUser,
+  validateStudentOnboardingStep1,
+  validateStudentOnboardingStep2,
+} from '@/lib/studentApiMap'
 
 const SUBJECTS = [
   'Mathematics',
@@ -36,6 +43,7 @@ const GOALS = [
 ]
 
 const CompleteProfileModal = ({ open, onComplete, required = false }) => {
+  const { user } = useAuth()
   const { t, labelFor, isKhmer } = useTranslation()
   const opts = useLocalizedFilterOptions()
   const locationOptions = useMemo(
@@ -46,13 +54,7 @@ const CompleteProfileModal = ({ open, onComplete, required = false }) => {
   const [step1Errors, setStep1Errors] = useState(false)
   const [selected, setSelected] = useState([])
   const [selectedGoals, setSelectedGoals] = useState([])
-  const [form, setForm] = useState({
-    firstName: '',
-    lastName: '',
-    location: '',
-    phone: '',
-    bio: '',
-  })
+  const [form, setForm] = useState(() => studentOnboardingFormFromUser(user))
 
   const steps = [
     {
@@ -77,19 +79,14 @@ const CompleteProfileModal = ({ open, onComplete, required = false }) => {
 
   useEffect(() => {
     if (open) {
+      const { interests, goals } = studentOnboardingSelectionsFromUser(user)
       setStep(1)
       setStep1Errors(false)
-      setSelected([])
-      setSelectedGoals([])
-      setForm({
-        firstName: '',
-        lastName: '',
-        location: '',
-        phone: '',
-        bio: '',
-      })
+      setSelected(interests)
+      setSelectedGoals(goals)
+      setForm(studentOnboardingFormFromUser(user))
     }
-  }, [open])
+  }, [open, user])
 
   useEffect(() => {
     if (!open) return
@@ -235,24 +232,29 @@ const CompleteProfileModal = ({ open, onComplete, required = false }) => {
                 )}
               </div>
               <RequiredFieldsHint>{t('auth.requiredFieldsHint')}</RequiredFieldsHint>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Input
-                  label={t('auth.lastName')}
-                  placeholder={t('studentOnboarding.lastNamePlaceholder')}
-                  value={form.lastName}
-                  onChange={(e) => setField('lastName', e.target.value)}
-                  error={step1Errors && !form.lastName.trim() ? t('auth.lastNameRequired') : undefined}
-                  required
-                />
-                <Input
-                  label={t('auth.firstName')}
-                  placeholder={t('studentOnboarding.firstNamePlaceholder')}
-                  value={form.firstName}
-                  onChange={(e) => setField('firstName', e.target.value)}
-                  error={step1Errors && !form.firstName.trim() ? t('auth.firstNameRequired') : undefined}
-                  required
-                />
-              </div>
+              <NameFieldsGrid
+                isKhmer={isKhmer}
+                firstNameField={
+                  <Input
+                    label={t('auth.firstName')}
+                    placeholder={t('studentOnboarding.firstNamePlaceholder')}
+                    value={form.firstName}
+                    onChange={(e) => setField('firstName', e.target.value)}
+                    error={step1Errors && !form.firstName.trim() ? t('auth.firstNameRequired') : undefined}
+                    required
+                  />
+                }
+                lastNameField={
+                  <Input
+                    label={t('auth.lastName')}
+                    placeholder={t('studentOnboarding.lastNamePlaceholder')}
+                    value={form.lastName}
+                    onChange={(e) => setField('lastName', e.target.value)}
+                    error={step1Errors && !form.lastName.trim() ? t('auth.lastNameRequired') : undefined}
+                    required
+                  />
+                }
+              />
               <SearchableSelect
                 label={t('studentOnboarding.location')}
                 value={form.location}

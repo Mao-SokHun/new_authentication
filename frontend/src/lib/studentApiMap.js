@@ -17,6 +17,23 @@ export function validateStudentOnboardingStep2(interests) {
   return validateStudentOnboardingStep2Shared(interests)
 }
 
+/** Pre-fill student onboarding modal from session / profile cache. */
+export function studentOnboardingFormFromUser(user = {}) {
+  return {
+    firstName: user.firstName ?? '',
+    lastName: user.lastName ?? '',
+    location: user.location ?? user.province ?? '',
+    phone: user.phone ?? '',
+    bio: user.bio ?? '',
+  }
+}
+
+export function studentOnboardingSelectionsFromUser(user = {}) {
+  const interests = Array.isArray(user.interests) ? user.interests : []
+  const goals = Array.isArray(user.goals) ? user.goals : []
+  return { interests, goals }
+}
+
 /** UI onboarding/edit form → API body (align with your student table when ready). */
 export function studentProfileToApiPayload(profile = {}) {
   const firstname = profile.firstName?.trim() ?? ''
